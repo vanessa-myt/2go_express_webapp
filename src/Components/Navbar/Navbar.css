@@ -1,0 +1,13 @@
+.pink {
+    background-color: #EC0B8C;
+}
+
+.menu-li {
+    font-family: "Gotham-Rounded-Medium";
+    list-style: none;
+    color: white;
+  }
+
+.login-logo {
+    width: 20%;
+}

@@ -12,6 +12,10 @@ header {
     justify-content: left;
 }
 
+.hide {
+    display: none;
+}
+
 .mt-5 {
     margin-top: 5%;
 }
