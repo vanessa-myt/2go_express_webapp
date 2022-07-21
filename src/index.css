@@ -11,3 +11,29 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/**FONTS**/
+@font-face {
+  font-family: 'Gotham-Rounded-Medium' ;
+  src: url('../src/Assets/Fonts/GothamRoundedRegular/GothamRounded-Medium.otf');
+}
+
+@font-face {
+  font-family: 'Gotham-Rounded-Bold';
+  src: url('../src/Assets/Fonts/GothamBold/GothamRoundedBold_21016.ttf');
+}
+
+@font-face {
+  font-family: 'Gotham-Rounded-Light';
+  src: url('../src/Assets/Fonts/GothamRoundedLight/Gotham-Rounded-Light.otf');
+}
+
+@font-face {
+  font-family: 'Varela-Rounded-Regular';
+  src: url('../src/Assets/Fonts/VerelaRoundRegular/VarelaRound-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Concert-One';
+  src: url('../src/Assets/Fonts/ConcertOne/ConcertOne-Regular.ttf');
+}

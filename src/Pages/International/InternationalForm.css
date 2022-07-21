@@ -1,0 +1,204 @@
+header {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 30px;
+}
+
+.center {
+    justify-content: center;
+}
+
+.left {
+    justify-content: left;
+}
+
+.mt-5 {
+    margin-top: 5%;
+}
+
+.asterisk {
+    color: var(--cancel-btn)
+}
+
+#country {
+    color: var(--secondary-color);
+    background-color: white;
+}
+
+/* buttons */
+.btn-rad{
+    border-radius: 10px;
+    width: 100%;
+    height:5vh
+}
+
+.btn-next{
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+}
+
+.btn-back{
+    background-color: var(--cancel-btn);
+    color: white;
+    border: 2px solid white;
+}
+
+.btn-clear{
+    background-color: white;
+    color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+}
+
+.btn-clear:hover{
+    background-color: var(--secondary-color);
+    border: 2px solid white;
+    color: white;
+    /* box-shadow: 5px 10px #888888; */
+}
+
+.search-input {
+    border: none;
+    background-color: #ECF2F4;
+    /* border-radius: 10px; */
+}
+
+.search-input:focus {
+    border: none;
+    background-color: #ECF2F4;
+    /* border-radius: 10px; */
+}
+
+.search-icon {
+    border: 2px solid #ECF2F4;
+    background-color: #ECF2F4;
+    cursor: pointer
+    /* border-radius: 10px; */
+}
+
+.search-container{
+    position: absolute;
+    width:83%
+}
+
+#search-result-input:disabled, #search-result-input[readonly] {
+    background-color: white;
+}
+
+.search-results {
+    background-color: white;
+    border-radius: 0px 0px 0px 0px;
+    z-index:1;
+}
+
+#search-result-input:hover{
+    background-color: #fff0f3;
+    cursor: pointer;
+    z-index:1;
+    /* box-shadow:1px 1px 2px #888888 */
+}
+
+
+
+
+@media screen and (max-width: 550px) {
+    .header {
+        font-size: 7vw;
+    }
+
+    .container {
+        max-width: 230vw;
+        margin: 5px;
+        margin-left: -1vw;
+        /* margin-left: 13px; */
+    }
+
+    .form-group {
+        font-size: 10px;
+        margin-right: -7px;
+    } 
+
+    #country {
+        font-size: 10px;
+    }
+
+    .form-control {
+        font-size: 10px;
+    }
+
+    .form-select-md {
+        font-size: 10px;
+    }
+
+    .input-group-text {
+        font-size: 10px;
+    }
+
+    .custom-control-label {
+        font-size: 10px;
+    }
+
+    .asterisk {
+        width: 85vw;
+    }
+
+    .btn-rad {
+        font-size: 10px;
+    }
+
+}
+
+@media screen and (max-width: 415px) {
+    .container {
+        margin-left: 3vw;
+    }
+
+    .form-control {
+        font-size: 10px;
+       
+    }
+
+    .search-icon {
+        margin-right: 3vw;
+    }
+
+    .col-4 {
+        width: 95%;
+        margin-bottom: 10px;
+    }
+
+    .col-2 {
+        width: 35%;
+        /* margin-bottom: 10px; */
+    }
+
+    .col-3 {
+        width: 40%;
+        margin-bottom: 10px;
+    }
+    
+    .col-6 {
+        /* width: 45%; */
+        width: 90%;
+    }
+
+    .btn-back {
+        width: 50px !important;
+    }
+
+    .btn-clear {
+        width: 20vw !important;
+        /* margin-left: -25px; */
+    }
+
+    .btn-next {
+        width: 50px !important;
+        margin-left: 0vw;
+    }
+}
+
+@media screen and (min-width: 549px) and (max-width: 1000px) {
+    .container {
+        margin-left: 1vw;
+    }
+}

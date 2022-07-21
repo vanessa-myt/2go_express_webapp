@@ -1,0 +1,18 @@
+.login-logo {
+    width: 100%;
+    padding: 10%;
+    margin-bottom: 5%;
+  }
+
+.mt-10 {
+    margin-top: 10%;
+    padding: 10%;
+
+  }
+
+.login-cont {
+    border: 3px solid #ec0b8c;
+    box-sizing: border-box;
+    border-radius: 90px;
+    padding: 3% 15% 5% 15%;
+  }
