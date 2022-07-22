@@ -15,6 +15,7 @@ header {
 
 .right {
     justify-content: right;
+    float: right;
 }
 
 .hide {
@@ -29,6 +30,10 @@ header {
     margin-top: 5%;
 }
 
+.mr-5 {
+    margin-left: 5%;
+}
+
 .asterisk {
     color: var(--cancel-btn)
 }
@@ -39,16 +44,27 @@ header {
 }
 
 /* buttons */
-.btn-rad{
-    border-radius: 10px;
-    width: 100%;
-    height:5vh
+.btn-blue {
+    background-color: #2A96C6;
+    color: white;
+    border: 2px solid #2A96C6;
+    font-family: 'Gotham-Rounded-Bold';
+
 }
 
-.btn-clear{
-    background-color: white;
-    color: var(--secondary-color);
-    border: 2px solid var(--secondary-color);
+.btn-pink {
+    background-color: #EC0B8C;
+    color: white;
+    border: 2px solid #EC0B8C;
+    font-family: 'Gotham-Rounded-Bold';
+
+}
+
+.btn-rad{
+    border-radius: 10px;
+    width:150px;
+    height:5vh;
+    max-height: 5vh;
 }
 
 .btn-clear:hover{
@@ -75,7 +91,7 @@ header {
     color: var(--secondary-color);
     border: 2px solid skyblue;
     color: #2A96C6;
-     font-family: 'Gotham-Rounded-Bold';
+    font-family: 'Gotham-Rounded-Bold';
 
 }
 
@@ -127,6 +143,10 @@ header {
 }
 
 /* tables */
+.table-overflow {
+    overflow-x: auto;
+}
+
 .item-table{
     border-radius: 10px;
 }

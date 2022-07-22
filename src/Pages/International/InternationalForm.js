@@ -476,14 +476,18 @@ function InternationalForm() {
             {/* ITEM DETAILS */}
             <div className='container'>
                 <h1 className="row mb-4 text-center header mt-5  title center">ITEM DETAILS</h1>
-                <div className="col-2">
-                    <div className="form-group">
-                        <button className="btn-clear btn-rad right" data-bs-toggle="modal" data-bs-target="#exampleModal" > + Item </button>
-                        {/* onClick={openModal} */}
+                <div className='row mb-6'>
+                    <div className='col-6'></div>
+                    <div className="col-6">
+                        <div className="form-group">
+                            <button className="btn-clear btn-rad right" data-bs-toggle="modal" data-bs-target="#exampleModal" > + Item </button>
+                            {/* onClick={openModal} */}
+                        </div>
                     </div>
                 </div>
+               
                 
-                <div className='row container-fluid'>
+                <div className='row container-fluid table-overflow'>
                     <table className="table table-bordered table-hover item-table mt-3">
                         <thead className="item-table-headers">
                             <tr>
@@ -525,7 +529,8 @@ function InternationalForm() {
                     </table>
                 </div>
                 
-                <div className="col-4 left mt-3">
+                <div className='row mb-6'>
+                    <div className="col-6 left mt-3">
                         <div className="form-group">
                             <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability"/>
                             {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
@@ -533,8 +538,26 @@ function InternationalForm() {
                             <label className="custom-control-label input-subtitle" htmlFor="purchase-limit">I agree of the </label>
                             <a> </a>
                             <a className='pink-text'>Terms and conditions</a>
-                        </div>
+                        </div> 
                     </div>
+                    {/* <div className="col-3"></div> */}
+                    {/* <div className="col">
+                        <div className="form-group">
+                            <button className="btn-clear btn-rad right" data-bs-toggle="modal" data-bs-target="#exampleModal" > + Item </button>
+                            {/* onClick={openModal} 
+                        </div>
+                    </div>  */}
+                    <div className="col-6">
+                        <div className="form-group">
+                            <button className="btn-blue btn-rad right mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal" > Next </button>
+                            <button className="btn-pink btn-rad right mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal" > Clear All </button>
+                            {/* onClick={openModal} */}
+                        </div>
+                    </div> 
+                </div>
+                
+
+               
 
                 {/* item details end */}
             </div>
