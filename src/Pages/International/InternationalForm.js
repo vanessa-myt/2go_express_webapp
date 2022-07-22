@@ -12,11 +12,30 @@ import ReactLoading from 'react-loading';
 
 //assets
 import Navbar from '../../Components/Navbar/Navbar';
+import editicon from '../../Assets/Images/Form/edit_icon.png';
+import deleteicon from '../../Assets/Images/Form/delete_icon.png';
 
 //ccs
 import "./InternationalForm.css"
 
 function InternationalForm() {
+
+    //item table headers
+    const headers = [
+        {label: 'Description', key: 'description'},
+        {label: 'HS Code', key: 'hs_code'},
+        {label: 'Made In', key: 'made_in'},
+        {label: 'Qty (pcs)', key: 'qty'},
+        {label: 'Unit', key: 'unit'},
+        {label: 'Weight (kg)', key: 'weight'},
+        {label: 'Customs Value (PHP)', key: 'customs_value'},
+        {label: 'Actions', key: 'actions'},
+    ];
+
+    const data = [
+        {description: 'Clothes', hs_code: '111', made_in: 'Ph', qty: '1', unit: '2', weight: '1kg', customs_value: '101', },
+        {description: 'Textboks', hs_code: '112', made_in: 'Ph', qty: '10', unit: '3', weight: '5kg', customs_value: '100', },
+    ];
 
     const navigateto = useNavigate();
     const[announcements, setAnnouncements] = useState([]);
@@ -24,6 +43,55 @@ function InternationalForm() {
     const[cities, setCities] = useState([]);
     const[provinces, setProvinces] = useState([]);
     const[searchInput, setSearchInput] = useState("");
+
+    // const handleSaveItem=(e)=>{
+    //     setIndex(index+1)
+    //     var totalqty=0, totalweight=0, totalcustoms=0
+    //     var newdata
+    //     if(e.target.value === "add_item"){
+    //         if(validateItemDetails(item, setIsItemError)) {
+    //             item["id"] = index+1
+    //             if(item.new_item_profile === "" || item.new_item_profile === undefined){
+    //                 setItem({new_item_profile:"0"})    
+    //             }
+    //             setData([...data, item]);
+    //             newdata = [...data, item]
+    //             setItem({unit:"PCS", new_item_profile:"0", hs_code:""})
+    //             setItemModal(false);
+    //             setCountrySelections([])
+    //         }
+           
+    //     }
+    //     if(e.target.value === "edit_item"){
+    //         if(validateItemDetails(editItem, setIsItemError)) {
+    //             newdata = [...data]
+    //             const indexdata = data.findIndex((data)=> data.id === itemID)
+    //             newdata[indexdata].id = editItem.id
+    //             newdata[indexdata].description = editItem.description
+    //             newdata[indexdata].hs_code = editItem.hs_code?editItem.hs_code:""
+    //             newdata[indexdata].made_in = editItem.made_in
+    //             newdata[indexdata].qty = editItem.qty
+    //             newdata[indexdata].unit = editItem.unit
+    //             newdata[indexdata].weight = editItem.weight 
+    //             newdata[indexdata].customs_value = editItem.customs_value 
+    //             newdata[indexdata].new_item_profile = editItem.new_item_profile 
+    //             setData(newdata)
+    //             setEditItemModal(false);
+    //             setIsEditing(false)
+    //             setCountrySelections([])
+    //         }
+    //     }
+        
+    //     newdata.forEach(element => {
+    //         totalqty += parseFloat(element.qty);
+    //         totalweight += parseFloat(element.weight);
+    //         totalcustoms += parseFloat(element.customs_value);
+    //       });
+    //     setItemTotals({ 
+    //     totalQty:totalqty,
+    //     totalWeight:totalweight,
+    //     totalCustoms:totalcustoms,})
+    // }
 
     return (
     <div className='container'>
@@ -288,7 +356,8 @@ function InternationalForm() {
                                 //onChange={(e) => handleFilterChange(e)}
                                 >
                                 <option value="FEDEX_INTERNATIONAL_PRIORITY">FedEx International Priority®</option>
-                                <option value="FedEx">FedEx</option>
+                                <option value="FEDEX_INTERNATIONAL_PRIORITY">FedEx International Priority® Express</option>
+                            
                             </select>
                         </div>
                     </div>
@@ -384,7 +453,7 @@ function InternationalForm() {
                             </div>
                         </div>
                     </div>
-                    <div className="col-4 left mt-2">
+                    <div className="col-4 left mt-3">
                         <div className="form-group">
                             <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability"/>
                             {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
@@ -397,12 +466,77 @@ function InternationalForm() {
                             <label className="custom-control-label input-subtitle text-align-left" htmlFor="signature-req">Require Signature</label>
                         </div>
                     </div>
-            
                     
                 </div>
 
+                <hr></hr>
+             {/* package details div */}
+            </div>
 
-            {/* package details div */}
+            {/* ITEM DETAILS */}
+            <div className='container'>
+                <h1 className="row mb-4 text-center header mt-5  title center">ITEM DETAILS</h1>
+                <div className="col-2">
+                    <div className="form-group">
+                        <button className="btn-clear btn-rad right" data-bs-toggle="modal" data-bs-target="#exampleModal" > + Item </button>
+                        {/* onClick={openModal} */}
+                    </div>
+                </div>
+                
+                <div className='row container-fluid'>
+                    <table className="table table-bordered table-hover item-table mt-3">
+                        <thead className="item-table-headers">
+                            <tr>
+                                {headers.map((row) => (
+                                        <th align="left" scope="col">{row.label}</th>
+                                    ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data?.map((row, index) => (
+                            <tr key={index}
+                            >
+                                <td align="left" className='input-subtitle'>{row.description}</td>
+                                <td align="left" className='input-subtitle'>{row.hs_code}</td>
+                                <td align="left" className='input-subtitle'>{row.made_in}</td>
+                                <td align="center" className='input-subtitle'>{row.qty}</td>
+                                <td align="center" className='input-subtitle'>{row.unit}</td>
+                                <td align="center" className='input-subtitle'>{row.weight}</td>
+                                <td align="center" className='input-subtitle'>{row.customs_value}</td>
+                                <td align="center" style={{display:"flex", justifyContent:"space-around"}}>
+                                    <img src={editicon} className="tb-icons" onClick={() => console.log("edit")}/>
+                                    {/* onClick={()=>handleItemEdit(row.id)} */}
+                                    <img src={deleteicon} className="tb-icons" onClick={() => console.log("del")}/>
+                                    {/* onClick={()=>handleItemDelete(row.id)} */}
+                                </td>
+                            </tr>
+                            ))}
+                        </tbody>
+                        <tfoot className="item-table-headers">
+                            <tr style={{backgroundColor:"#EC0B8C"}}>
+                                <td colspan="3" align="right" className='input-subtitle'>TOTAL:</td>
+                                <td align="center" className='input-subtitle'>11</td>
+                                <td align="right" className='input-subtitle'>-</td>  
+                                <td align="center" className='input-subtitle'>6</td>  
+                                <td align="center" className='input-subtitle'>201</td>  
+                                <td align="right" className='input-subtitle'>-</td>  
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div className="col-4 left mt-3">
+                        <div className="form-group">
+                            <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability"/>
+                            {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
+                            {/* <p className='input'>Dimensions</p> */}
+                            <label className="custom-control-label input-subtitle" htmlFor="purchase-limit">I agree of the </label>
+                            <a> </a>
+                            <a className='pink-text'>Terms and conditions</a>
+                        </div>
+                    </div>
+
+                {/* item details end */}
             </div>
             
 

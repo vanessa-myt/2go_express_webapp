@@ -14,6 +14,9 @@ import Login from "./Pages/Login/Login";
 import InternationalForm from "./Pages/International/InternationalForm";
 
 function App() {
+  document.title = "2GO BOOKING";
+  document.body.style = "background: #F3F3F3;";
+
   return (
     <div className="App">
       <Router>
