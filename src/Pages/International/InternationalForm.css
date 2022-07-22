@@ -10,10 +10,15 @@ header {
 
 .left {
     justify-content: left;
+    text-align: left;
 }
 
 .hide {
     display: none;
+}
+
+.mt-2 {
+    margin-top: 2%;
 }
 
 .mt-5 {
