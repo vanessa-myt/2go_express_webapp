@@ -257,7 +257,7 @@ function InternationalForm({sender, setSender, provinceSelections, setProvinceSe
                         <div className="col-6">
                             <div className="form-group">
                                 <p className='input-subtitle'>Name</p>
-                                <input type="text" name="sender_firstname" className="form-control" id="first-name" aria-describedby="first-name" placeholder="e.g. Juan Dela Cruz Jr."/>
+                                <input type="text" name="sender_firstname" className="form-control" id="first-name" aria-describedby="first-name" placeholder="e.g. Juan Dela Cruz Jr." onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_firstname}/>
                                 {/* <input type="text" name="sender_firstname" className="form-control" id="first-name" aria-describedby="first-name" placeholder="e.g. Jane" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_firstname}/> */}
                                 {/* <InputError isValid={isError.sender_firstname} message={'First name is required*'}/> */}
                             </div>
@@ -265,7 +265,7 @@ function InternationalForm({sender, setSender, provinceSelections, setProvinceSe
                         <div className="col-6">
                             <div className="form-group">
                                 <p className='input-subtitle'>Company Name</p>
-                                <input type="text" name="sender_company" className="form-control" id="company" aria-describedby="company" />
+                                <input type="text" name="sender_company" className="form-control" id="company" aria-describedby="company" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_company}/>
                                 {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_company} */}
                                 {/* <InputError isValid={isError.sender_company_short} message={'Company Name must contain at least 3 characters.'}/>
                                 <InputError isValid={isError.sender_company_long} message={'Company Name must not exceed 35 characters.'}/> */}
