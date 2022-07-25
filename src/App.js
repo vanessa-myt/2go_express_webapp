@@ -13,6 +13,7 @@ import {
 import Login from "./Pages/Login/Login";
 import InternationalForm from "./Pages/International/InternationalForm";
 import Confirmation from "./Pages/Confirmation/Confirmation";
+import SwitchForm from "./Pages/SwitchForm/SwitchForm";
 
 function App() {
   document.title = "2GO BOOKING";
@@ -22,7 +23,7 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={<InternationalForm />} />
+          <Route path="/" element={<SwitchForm />} />
         </Routes>      
         <Routes>
           <Route path="/confirmation" element={<Confirmation />} />

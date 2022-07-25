@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { useStep } from "react-hooks-helper";
 import InternationalForm from "../International/InternationalForm";
 
-const [isItem, setIsItem] = useState(true);
-const [isDocument, setIsDocument] = useState(false);
+function SwitchForm() {
 
 const senderDetails = {
     sender_firstname: "",
@@ -52,8 +51,6 @@ const steps = [
     // {id: "payment"},
     {id: "international"},
 ]
-
-function SwitchForm() {
 
     //sender
     const [sender, setSender] = useState(senderDetails);
@@ -146,7 +143,7 @@ function SwitchForm() {
         setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections, addActualWeight, setAddActualWeight, itemTotals, setItemTotals, navigation}
     const paymentProps = {type, generalDetails, transactionDetails, navigation}
     const summaryProps = {sender, recipient, upperDetails, packageDetails, transactionDetails, navigation}
-    const internationalProps = {isItem, setIsItem, isDocument, setIsDocument, upperDetails, setUpperDetails, sendDetails, setSendDetails,}
+    const internationalProps = {sender, setSender, provinceSelections, setProvinceSelections, citySelections, setCitySelections, isItem, setIsItem, isDocument, setIsDocument, upperDetails, setUpperDetails, sendDetails, setSendDetails, navigation}
     switch (step.id) {
         // case "sender":
         //     return <Sender { ...senderProps }/>   

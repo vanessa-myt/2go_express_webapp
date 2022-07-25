@@ -3,6 +3,7 @@ import {Form, Modal, Button} from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'bootstrap/dist/css/bootstrap.css';
 import { Navigate } from 'react-router-dom';
+import { validateSender } from '../../Helpers/Validation/InternationalFormValidation';
 
 import {useNavigate} from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
@@ -21,7 +22,7 @@ import glass from "../../Assets/Images/Form/magnifying_glass.png";
 //ccs
 import "./InternationalForm.css"
 
-function InternationalForm() {
+function InternationalForm({sender, setSender, provinceSelections, setProvinceSelections, citySelections, setCitySelections, isItem, setIsItem, isDocument, setIsDocument, upperDetails, setUpperDetails, sendDetails, setSendDetails, navigation}) {
 
     //item table headers
     const headers = [
@@ -77,11 +78,43 @@ function InternationalForm() {
     const [itemModal, setItemModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editItemModal, setEditItemModal] = useState(false);
-    const [isItem, setIsItem] = useState(true);
-    const [isDocument, setIsDocument] = useState(false);
+    // const [isItem, setIsItem] = useState(true);
+    // const [isDocument, setIsDocument] = useState(false);
     const [redirect, setRedirect] = useState("");
 
+    const {
+        sender_firstname,
+        sender_lastname,
+        sender_middlename,
+        sender_suffix,
+        sender_country,
+        sender_state_code,
+        sender_city,
+        sender_postal,
+        sender_email,
+        sender_contact_no,
+        sender_company,
+        sender_address1,
+        sender_address2,
+        sender_address3,
+        sender_is_new,
+        } = sender
 
+        console.log(sender)
+
+    //REQUIRED ERROR HANDLING
+    const [isError, setIsError] = useState({
+        sender_firstname: false,
+        sender_lastname: false,
+        sender_state_code: false,
+        sender_city: false,
+        sender_postal: false,
+        sender_address1: false,
+        sender_address_len: false,
+        sender_contact_no: false,
+        sender_company_short: false,
+        sender_company_long: false,
+    });
 
 
     // const handleSaveItem=(e)=>{
@@ -181,6 +214,27 @@ function InternationalForm() {
         // setSendDetails({})
     }
 
+    const handleSubmit=(e)=>{
+        e.preventDefault()
+        console.log(sender)
+        if(sender.sender_firstname !== "" || sender.sender_company !== "")
+        {
+            if(validateSender(sender, citySelections, provinceSelections, setIsError)){
+                setRedirect("next")
+                console.log("yawa")
+            }     
+        }
+        else{
+            toast.error("PLEASE PROVIDE EITHER A COMPANY OR A NAME",{ autoClose: 4000, hideProgressBar: true });
+            console.log("yawa2")
+            
+        }
+       
+        // else{
+        //     toast.error("PLEASE COMPLETE ALL REQUIRED FIELDS.");
+        // }
+    }
+
     if(redirect === "next") {
         return <Navigate to="/Confirmation"/>
     }
@@ -211,7 +265,7 @@ function InternationalForm() {
                         <div className="col-6">
                             <div className="form-group">
                                 <p className='input-subtitle'>Company Name</p>
-                                <input type="text" name="sender_company" className="form-control" id="company" aria-describedby="company"/>
+                                <input type="text" name="sender_company" className="form-control" id="company" aria-describedby="company" />
                                 {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_company} */}
                                 {/* <InputError isValid={isError.sender_company_short} message={'Company Name must contain at least 3 characters.'}/>
                                 <InputError isValid={isError.sender_company_long} message={'Company Name must not exceed 35 characters.'}/> */}
@@ -225,7 +279,7 @@ function InternationalForm() {
                                 {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
                                 <select
                                     className="filter-dropdown form-control"
-                                    name="country"
+                                    name="sender_country"
                                     //onChange={(e) => handleFilterChange(e)}
                                     >
                                     <option value="">Country</option>
@@ -699,7 +753,7 @@ function InternationalForm() {
                     </div>  */}
                     <div className="col-6">
                         <div className="form-group">
-                            <button className="btn-blue btn-rad right mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={() => setRedirect("next")}> Next </button>
+                            <button className="btn-blue btn-rad right mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={handleSubmit}> Next </button>
                             <button className="btn-pink btn-rad right mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal" > Clear All </button>
                             {/* onClick={openModal} */}
                         </div>
