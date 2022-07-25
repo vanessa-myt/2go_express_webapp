@@ -92,7 +92,7 @@
   box-sizing: border-box;
   border-radius: 15px;
   padding: 3% 5% 3% 3%;
-  margin-top: 5%;
+  margin-top: 2%;
   background-color: white;
   box-shadow: inset 0 0 7px grey;
 
@@ -194,4 +194,51 @@ input:disabled {
 
 select:disabled {
   background: #dddddd;
+}
+
+@media screen and (max-width: 550px) {
+  .header {
+      font-size: 7vw;
+  }
+
+  .container {
+      max-width: 230vw;
+      margin: 5px;
+      margin-left: -1vw;
+      /* margin-left: 13px; */
+  }
+
+  .form-group {
+      font-size: 10px;
+      margin-right: -7px;
+  } 
+
+  #country {
+      font-size: 10px;
+  }
+
+  .form-control {
+      font-size: 10px;
+  }
+
+  .form-select-md {
+      font-size: 10px;
+  }
+
+  .input-group-text {
+      font-size: 10px;
+  }
+
+  .custom-control-label {
+      font-size: 10px;
+  }
+
+  .asterisk {
+      width: 85vw;
+  }
+
+  .btn-rad {
+      font-size: 10px;
+  }
+
 }

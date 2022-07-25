@@ -12,6 +12,7 @@ import {
 //PAGES
 import Login from "./Pages/Login/Login";
 import InternationalForm from "./Pages/International/InternationalForm";
+import Confirmation from "./Pages/Confirmation/Confirmation";
 
 function App() {
   document.title = "2GO BOOKING";
@@ -22,7 +23,10 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<InternationalForm />} />
-        </Routes>           
+        </Routes>      
+        <Routes>
+          <Route path="/confirmation" element={<Confirmation />} />
+        </Routes>        
       </Router>
     </div>
   );

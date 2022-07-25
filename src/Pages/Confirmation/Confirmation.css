@@ -1,0 +1,20 @@
+.x-large {
+    font-size: x-large;
+}
+
+.icon {
+    width: 60px;
+}
+
+.w-330 {
+    width: 330px;
+}
+
+.pink-border {
+    color: #EC0B8C;
+    border: 2px solid #EC0B8C;
+    border-radius: 10px;
+    font-family: 'Gotham-Rounded-Bold';
+    height: 45px;
+    text-align: center;
+}

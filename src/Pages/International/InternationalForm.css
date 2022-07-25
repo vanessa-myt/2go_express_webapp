@@ -53,11 +53,18 @@ header {
 }
 
 .btn-pink {
+    background-color: white;
+    color: #EC0B8C;
+    border: 2px solid #EC0B8C;
+    font-family: 'Gotham-Rounded-Bold';
+
+}
+
+.btn-pink:hover{
     background-color: #EC0B8C;
     color: white;
     border: 2px solid #EC0B8C;
     font-family: 'Gotham-Rounded-Bold';
-
 }
 
 .btn-rad{
@@ -175,9 +182,40 @@ header {
     width:94%
 }
 
+.bg-grey {
+    background-color: var( --dropdown-bg);
+    border: none;
+    color: #2A96C6;
+    font-family: 'Gotham-Rounded-Bold';
 
 
+}
 
+.border-grey {
+    border: 2px solid #D1D1D1;
+    border-radius: 10px;  
+    padding: 10px;
+}
+
+.pad-left5 {
+    padding-left: 5px;
+}
+
+.blue-txt{
+    color: #2A96C6;
+}
+
+.pink-txt{
+    color: #EC0B8C;
+}
+
+.grey-txt{
+    color: #7C7C7C;
+}
+
+.orange-txt {
+    color: #FF4141;
+}
 
 @media screen and (max-width: 550px) {
     .header {
