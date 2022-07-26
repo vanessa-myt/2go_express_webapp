@@ -8,6 +8,7 @@ import InputError from '../../Components/InputError/InputError';
 import {useNavigate} from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Moment from "moment";
 //import {validateSender} from "../../Helpers/Validation/senderValidation";
 import ReactLoading from 'react-loading';
 // import { Typeahead } from 'react-bootstrap-typeahead';
@@ -23,8 +24,13 @@ import glass from "../../Assets/Images/Form/magnifying_glass.png";
 import "./InternationalForm.css"
 
 function InternationalForm({sender, setSender, recipient, setRecipient, provinceSelections, setProvinceSelections, isItem, setIsItem, isDocument, 
-                            setIsDocument, upperDetails, setUpperDetails, sendDetails, setSendDetails, navigation, singleSelections, setSingleSelections,
-                            singleSelectionsSender, setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient}) {
+                            setIsDocument, upperDetails, setUpperDetails, sendDetails, setSendDetails, navigation, index, item, setItem, setIndex,
+                            singleSelectionsSender, setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient,
+                            packageDetails, setPackageDetails, data, setData, maxWeight, maxLength, setMaxLength, setMaxWeight, maxWidth, setMaxWidth, 
+                            maxHeight, setMaxHeight, documentCustoms, setDocumentCustoms, documentDesc, setDocumentDesc, documentType, setDocumentType, 
+                            documentWeight, setDocumentWeight, loadingPackage, setLoadingPackage, 
+                            searchingItem, setSearchingItem, setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections,
+                            addActualWeight, setAddActualWeight, itemTotals, setItemTotals,}) {
 
     //item table headers
     const headers = [
@@ -38,7 +44,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         {label: 'Actions', key: 'actions'},
     ];
 
-    const data = [
+    const tabledata = [
         {description: 'Clothes', hs_code: '111', made_in: 'Ph', qty: '1', unit: '2', weight: '1kg', customs_value: '101', },
         {description: 'Textboks', hs_code: '112', made_in: 'Ph', qty: '10', unit: '3', weight: '5kg', customs_value: '100', },
     ];
@@ -83,6 +89,12 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     // const [isItem, setIsItem] = useState(true);
     // const [isDocument, setIsDocument] = useState(false);
     const [redirect, setRedirect] = useState("");
+    const [shipdate, setShipDate] = useState("");
+    const [isCustomPackaging, setIsCustomPackaging] = useState(false);
+
+    if (shipdate === "" ) {
+        setShipDate(Moment().format("YYYY-MM-DD"));
+      }
 
     const {
         sender_firstname,
@@ -122,7 +134,39 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
             ship_date,
         } = recipient
 
+        const {
+            total_package_content_1,
+            total_customs_value_1,
+            weight_1,
+            length,
+            width,
+            height
+        } = packageDetails
+        const {} = sendDetails
+        const {
+            id,
+            description,
+            made_in,
+            qty,
+            unit,
+            weight,
+            customs_value,
+            new_item_profile,
+        } = item
+        const {
+            packaging_type,
+            service_type,
+            detail_type,
+            customs_invoice,
+            higher_limit_liability,
+            close_time,
+            purpose,
+            total_packages, 
+            total_weight, 
+        } = upperDetails
+
         console.log(sender)
+        console.log(recipient)
         console.log(recipient)
 
         //static country
@@ -156,7 +200,41 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         recipient_contact_no: false,
         recipient_company_short: false,
         recipient_company_long: false,
+
+        packaging_type: false,
+        documentCustoms: false,
+        documentType: false,
+        documentDesc: false,
+        documentWeight: false,
+        compareWeight: false,
+        data:false,
     });
+
+    const [isPackageError, setIsPackageError] = useState({
+        //upperDetails
+          packaging_type: false,
+  
+        // documentCustoms
+          documentCustoms: false,
+          documentType: false,
+          documentDesc: false,
+          documentWeight: false,
+          compareWeight: false,
+  
+        // item details
+          data:false,
+      });
+  
+      // REQUIRED ERROR HANDLING FOR ITEM DETAILS 
+      const [isItemError, setIsItemError] = useState({
+          description: false,
+          // hs_code:false,
+          made_in:false,
+          qty:false,
+          unit:false,
+          weight:false,
+          customs_value:false,
+      })
 
 
     // const handleSaveItem=(e)=>{
@@ -244,12 +322,12 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
     const handleSendType=(e)=>{
         if(e.target.value === "item"){
-            // upperDetails["detail_type"] = "item"
+            upperDetails["detail_type"] = "item"
             setIsItem(true);
             setIsDocument(false);
         }
         else {
-            // upperDetails["detail_type"] = "document"
+            upperDetails["detail_type"] = "document"
             setIsItem(false);
             setIsDocument(true);
         }
@@ -313,6 +391,53 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
     } 
 
+    const handleSelectChange=(e)=>{
+        const {name, value} = e.target;
+        if(name === "higher_limit_liability"){
+            if(e.target.checked){
+                setUpperDetails({...upperDetails, [name]: "1"});
+            }
+            else{
+                setUpperDetails({...upperDetails, [name]: "0"});
+            }
+        }
+
+        else if(name === "signature_required"){
+            if(e.target.checked){
+                setUpperDetails({...upperDetails, [name]: "1"});
+            }
+            else{
+                setUpperDetails({...upperDetails, [name]: "0"});
+            }
+        }
+        
+        else{
+            setUpperDetails({...upperDetails, [name]: value})
+        }
+
+    }
+
+    const handlePackageChange=(e)=>{
+        // packages.forEach((data)=>{
+        //     if(data.id === e.target.value){
+        //         setMaxWeight(data.max_weight)
+        //         setMaxLength(data.max_length === "0.00" && (e.target.value === "2" || e.target.value === "1") ? "" : data.max_length)
+        //         setMaxWidth(data.max_width === "0.00" && (e.target.value === "2" || e.target.value === "1") ? "" : data.max_width)
+        //         setMaxHeight(data.max_height === "0.00" && (e.target.value === "2" || e.target.value === "1") ? "" : data.max_height)
+        //         setUpperDetails({...upperDetails, packaging_type:e.target.value })
+        //         setPackageDetails({...packageDetails, length:data.max_length, width:data.max_width, height:data.max_height })
+        //     }
+            if(e.target.value === "1")
+                setIsCustomPackaging(true)
+            else
+                setIsCustomPackaging(false)
+        //     if(e.target.value === "11")
+        //         setAddActualWeight(true)
+        //     else
+        //         setAddActualWeight(false)
+        // })
+    }
+
     const handleClear=()=>{
         Object.keys(sender).forEach(key => {
             sender[key] = "";
@@ -339,7 +464,13 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         {
             if(recipient.recipient_firstname !== "" || recipient.recipient_company !== "") {
                 if(validateSender(sender, recipient, singleSelectionsSender, singleSelectionsRecipient , setIsError)){
-                    setRedirect("next")
+                    // setRedirect("next")
+                    toast.success("REDIRECTING TO CONFIRMATION...", { autoClose: 2000, hideProgressBar: true })
+                    setTimeout(()=>{
+                         navigation.next()
+                        // setRedirect("next")
+                    //   navigateto('/fedex/package', {state: {sender_details: state.sender_details, recipient_details: recipient}})     
+                    }, 2000)
                 } 
             }
             else{
@@ -651,7 +782,17 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-4">
                             <div className="form-group border-grey">
                                 <p className='input-subtitle'>Ship Date<span className='required-icon'>*</span></p>
-                                <input type="email" className="form-control bg-grey" id="email-add" aria-describedby="email-add" name="recipient_email" />
+                                <input
+                                    type="date"
+                                    name="ship_date"
+                                    onChange={(e)=>handleChange(e)} 
+                                    value={recipient.ship_date}
+                                    // onChange={(e) =>
+                                    //     setShipDate(Moment(e.target.value).format("YYYY-MM-DD"))
+                                    // }
+                                    className="modal-input date-input reports-date form-control bg-grey"
+                                    //value={shipdate}
+                                />
                                 {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_email} */}
                             </div>
                         </div>
@@ -663,6 +804,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     className="filter-dropdown form-control bg-grey"
                                     name="shipService"
                                     //onChange={(e) => handleFilterChange(e)}
+                                    value={upperDetails.service_type} 
+                                    onChange={handleSelectChange}
                                     >
                                     <option value="FEDEX_INTERNATIONAL_PRIORITY">FedEx International Priority®</option>
                                     <option value="FEDEX_INTERNATIONAL_PRIORITY">FedEx International Priority® Express</option>
@@ -677,6 +820,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 <select
                                     className="filter-dropdown form-control bg-grey"
                                     name="sending"
+                                    value={upperDetails.detail_type}
                                     onChange={handleSendType}
                                     //onChange={(e) => handleFilterChange(e)}
                                     >
@@ -695,10 +839,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     <select
                                         className="filter-dropdown form-control bg-grey"
                                         name="packageType"
+                                        value={upperDetails.packaging_type} 
+                                        onChange={handlePackageChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
-                                        <option value="">Sample 1</option>
-                                        <option value="sample2">Sample 2</option>
+                                        <option value="1">Custom</option>
+                                        <option value="2">Letter</option>
+                                        <option value="3">box</option>
+
                                     </select>
                                 </div>
                             </div>
@@ -709,6 +857,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     <select
                                         className="filter-dropdown form-control bg-grey"
                                         name="shipmentPurpose"
+                                        value={upperDetails.purpose} 
+                                        onChange={handleSelectChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
                                         <option defaultValue value="Commercial">Commercial</option>
@@ -727,6 +877,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     <select
                                         className="filter-dropdown form-control bg-grey"
                                         name="invoice"
+                                        value={upperDetails.customs_invoice} 
+                                        onChange={handleSelectChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
                                         <option value="pro_forma_invoice">I want FedEx to help me create a pro-forma invoice</option>
@@ -768,9 +920,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="form-group">
                                 <p className='input-subtitle'>Dimensions</p>
                                 <div className="input-group">
-                                <input type="number" className="form-control" aria-label="dimension" placeholder="length" />
-                                <input type="number" className="form-control" aria-label="dimension" placeholder="width" />
-                                <input type="number" className="form-control" aria-label="dimension" placeholder="height" />
+                                <input type="number" className="form-control" aria-label="dimension" placeholder="length"value={maxLength} onChange={(e)=>{setMaxLength(e.target.value); setPackageDetails({...packageDetails, length:e.target.value})}} disabled={!isCustomPackaging} />
+                                <input type="number" className="form-control" aria-label="dimension" placeholder="width" value={maxWidth} onChange={(e)=>{setMaxWidth(e.target.value); setPackageDetails({...packageDetails, width:e.target.value})}} disabled={!isCustomPackaging} />
+                                <input type="number" className="form-control" aria-label="dimension" placeholder="height" value={maxHeight} onChange={(e)=>{setMaxHeight(e.target.value); setPackageDetails({...packageDetails, height:e.target.value})}} disabled={!isCustomPackaging} />
                                 <span className="input-group-text bg-white">cm</span>
                                 
                                 {/* value={maxLength} onChange={(e)=>{setMaxLength(e.target.value); setPackageDetails({...packageDetails, length:e.target.value})}} disabled={!isCustomPackaging} */}
@@ -781,7 +933,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="form-group">
                             <p className='input-subtitle'>Max Weight<span className='required-icon'>*</span></p>
                             <div className="input-group">
-                                <input type="text" disabled className="form-control" aria-label="max-weight" />
+                                <input type="text" disabled className="form-control" aria-label="max-weight" value={maxWeight}/>
                                 {/* value={maxWeight} disabled */}
                                 <div className="input-group-append">
                                     <span className="input-group-text bg-white input-subtitle">kg</span>
@@ -794,13 +946,13 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <>
                             <div className="col-4 left mt-3">
                                 <div className="form-group">
-                                    <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability"/>
+                                    <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability" checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} />
                                     {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
                                     {/* <p className='input'>Dimensions</p> */}
                                     <label className="custom-control-label input-subtitle pad-left5" htmlFor="purchase-limit">Purchase a higher limit of liability from FedEx</label>
                                 </div>
                                 <div className="form-group text-align-left left">
-                                    <input type="checkbox" className="custom-control-inpu mr-10 text-align-left" id="signature-req" name="signature_required"/>
+                                    <input type="checkbox" className="custom-control-inpu mr-10 text-align-left" id="signature-req" name="signature_required" checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange}/>
                                     {/* checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange} */}
                                     <label className="custom-control-label input-subtitle text-align-left pad-left5" htmlFor="signature-req">Require Signature</label>
                                 </div>
@@ -811,7 +963,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <>
                             <div className="col-4 left mt-3">
                                 <div className="form-group">
-                                    <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability"/>
+                                    <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability" checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange}/>
                                     {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
                                     {/* <p className='input'>Dimensions</p> */}
                                     <label className="custom-control-label input-subtitle pad-left5" htmlFor="purchase-limit">Purchase a higher limit of liability from FedEx</label>
@@ -819,7 +971,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             </div>
                             <div className="col-4 left mt-3">
                                 <div className="form-group text-align-left left">
-                                    <input type="checkbox" className="custom-control-inpu mr-10 text-align-left" id="signature-req" name="signature_required"/>
+                                    <input type="checkbox" className="custom-control-inpu mr-10 text-align-left" id="signature-req" name="signature_required" checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange}/>
                                     {/* checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange} */}
                                     <label className="custom-control-label input-subtitle text-align-left pad-left5" htmlFor="signature-req">Require Signature</label>
                                 </div>
@@ -858,7 +1010,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {data?.map((row, index) => (
+                                    {tabledata?.map((row, index) => (
                                     <tr key={index}
                                     >
                                         <td align="left" className='input-subtitle'>{row.description}</td>

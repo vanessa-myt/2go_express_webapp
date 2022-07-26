@@ -8,9 +8,13 @@ import { Navigate } from 'react-router-dom';
 import "./Confirmation.css";
 import delivery from "../../Assets/Images/Form/delivery.png"
 
-function Summary() {
+function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDetails, transactionDetails, navigation}) {
     const [agree ,setAgree] = useState(true);
     const [redirect, setRedirect] = useState("");
+
+    // if(upperDetails.detail_type === "item") {
+    //     setIsItem()
+    // }
 
     //item table headers
     const headers = [
@@ -32,6 +36,8 @@ function Summary() {
     if(redirect === "back") {
         return <Navigate to="/"/>
     }
+
+    console.log(sender)
 
     return (
         <div style={{display:"flex", flexDirection:"row"}}>
@@ -56,11 +62,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Name:</p>
                             </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                            <div className="col-sm-6 left">
+                                <span className="input-subtitle">
+                                    {sender.sender_firstname}
                                 </span>
                             </div>
                         </div>
@@ -69,24 +73,20 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Country:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {sender.sender_country}
                                 </span>
                             </div>
                         </div>
                         <div className="col-sm-6"></div>
                             <div className="row mt-2">
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 ">
                                 <p className="input-subtitle grey-txt">State/Province:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {sender.sender_state_code}
                                 </span>
                             </div>
                         </div>
@@ -95,11 +95,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">City:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {sender.sender_city}
                                 </span>
                             </div>
                         </div>
@@ -108,11 +106,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Address Line 1:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {sender.sender_address1}
                                 </span>
                             </div>
                         </div>
@@ -121,11 +117,20 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Address Line 2:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {sender.sender_address1}    
+                                </span>
+                            </div>
+                        </div>
+                        <div className="col-sm-6"></div>
+                            <div className="row mt-2">
+                            <div className="col-sm-6">
+                                <p className="input-subtitle grey-txt">Address Line 3:</p>
+                            </div>
+                            <div className="col-sm-6 left">
+                                <span className="text span-summary">
+                                    {recipient.recipient_address3}
                                 </span>
                             </div>
                         </div>
@@ -134,11 +139,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Contact Number:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {sender.sender_address1}
                                 </span>
                             </div>
                         </div>
@@ -147,11 +150,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Email Address:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {sender.sender_email}
                                 </span>
                             </div>
                         </div>
@@ -160,11 +161,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Company Name:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {sender.sender_company}
                                 </span>
                             </div>
                         </div>
@@ -181,11 +180,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Name:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_firstname}
                                 </span>
                             </div>
                         </div>
@@ -194,11 +191,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Country:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_country}
                                 </span>
                             </div>
                         </div>
@@ -207,11 +202,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">State/Province:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_state_code}
                                 </span>
                             </div>
                         </div>
@@ -220,11 +213,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">City:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_city}
                                 </span>
                             </div>
                         </div>
@@ -233,11 +224,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Address Line 1:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_address1}
                                 </span>
                             </div>
                         </div>
@@ -246,11 +235,20 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Address Line 2:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_address2}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="col-sm-6"></div>
+                            <div className="row mt-2">
+                            <div className="col-sm-6">
+                                <p className="input-subtitle grey-txt">Address Line 3:</p>
+                            </div>
+                            <div className="col-sm-6 left">
+                                <span className="text span-summary">
+                                    {recipient.recipient_address3}
                                 </span>
                             </div>
                         </div>
@@ -259,11 +257,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Contact Number:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_contact_no}
                                 </span>
                             </div>
                         </div>
@@ -272,11 +268,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Email Address:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_email}
                                 </span>
                             </div>
                         </div>
@@ -285,11 +279,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Company Name:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.recipient_company}
                                 </span>
                             </div>
                         </div>
@@ -298,11 +290,9 @@ function Summary() {
                             <div className="col-sm-6">
                                 <p className="input-subtitle grey-txt">Ship Date:</p>
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
+                                    {recipient.ship_date}
                                 </span>
                             </div>
                         </div>
@@ -571,7 +561,7 @@ function Summary() {
                                 <p className="input-subtitle grey-txt x-large w-330 mr-0">Estimated Delivery Date:</p>
                             </div>
                             <div className="colsm-6 w-330">
-                                <p className="input-subtitle pink-txt x-large pink-border">August 1-5</p>
+                                <p className="input-subtitle pink-txt x-large pink-border">August 1</p>
                             </div>
                         </div>
                     </div>
@@ -580,7 +570,7 @@ function Summary() {
                 <div className="container">
                     <div className="row mb-4 justify-content-end">
                         <div className="col-sm-2">
-                            <button className="btn-pink btn-rad" onClick={() => setRedirect("back")}> Back </button>
+                            <button className="btn-pink btn-rad" onClick={()=>navigation.previous()}> Back </button>
                             {/* onClick={()=>navigation.previous()} */}
                         </div>
                         <div className="col-sm-2">

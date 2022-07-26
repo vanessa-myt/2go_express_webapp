@@ -18,3 +18,9 @@
     height: 45px;
     text-align: center;
 }
+
+.text {
+    font-family: 'Gotham-Rounded-Bold';
+    margin-bottom: 0;
+    text-align: left;
+}

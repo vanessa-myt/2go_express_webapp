@@ -44,7 +44,7 @@ export const validateSender = (data, recipient, singleSelectionsSender, singleSe
     // }
 
     //SENDER
-    if(data.sender_country === "" || singleSelections.length <=0) {
+    if(data.sender_country === "" || singleSelectionsSender.length <=0) {
         handleValidationChange("sender_country", true, setIsError);
         isValidCountry = false;
     } else {
@@ -122,7 +122,7 @@ export const validateSender = (data, recipient, singleSelectionsSender, singleSe
     }
 
     //RECIPIENT
-    if(recipient.recipient_country === "" || singleSelections.length <=0) {
+    if(recipient.recipient_country === "" || singleSelectionsRecipient.length <=0) {
         handleValidationChange("recipient_country", true, setIsError);
         isValidRecipientCountry = false;
     } else {

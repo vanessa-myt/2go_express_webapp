@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { useStep } from "react-hooks-helper";
 import InternationalForm from "../International/InternationalForm";
+import Confirmation from "../Confirmation/Confirmation";
+import { formatDate, formatDateNoTime, getTodayDate } from "../../Helpers/Utils/Common";
 
 function SwitchForm() {
+
+    const date = formatDateNoTime(getTodayDate());
+    // formatDateNoTime(date);
 
 const senderDetails = {
     sender_firstname: "",
@@ -40,7 +45,7 @@ const recipientDetails = {
     recipient_address3:"",
     recipient_is_new: "0",
     recipient_is_residential:"0",
-    // ship_date:new Date(),
+    ship_date: date,
 }
 
 const steps = [
@@ -50,6 +55,7 @@ const steps = [
     // {id: "summary"},
     // {id: "payment"},
     {id: "international"},
+    {id: "summary"},
 ]
 
     //sender
@@ -144,7 +150,7 @@ const steps = [
         documentDesc, setDocumentDesc, documentType, setDocumentType, documentWeight, setDocumentWeight, isItem, setIsItem, isDocument, setIsDocument, loadingPackage, setLoadingPackage, searchingItem, setSearchingItem, 
         setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections, addActualWeight, setAddActualWeight, itemTotals, setItemTotals, navigation}
     const paymentProps = {type, generalDetails, transactionDetails, navigation}
-    const summaryProps = {sender, recipient, upperDetails, packageDetails, transactionDetails, navigation}
+
 
     const internationalProps = {sender, setSender, hasResult, setHasResult, result, setResult, searchingSender, setSearchingSender, provinceSelections, 
                                 setProvinceSelections, navigation, recipient, setRecipient, postalAware, setPostalAware, 
@@ -156,6 +162,9 @@ const steps = [
                                 setSearchingItem, setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections, addActualWeight, 
                                 setAddActualWeight, itemTotals, setItemTotals, type, generalDetails, transactionDetails, upperDetails, packageDetails, singleSelectionsSender, 
                                 setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient}
+
+    const summaryProps = {sender, recipient, upperDetails, packageDetails, transactionDetails, navigation}
+
     switch (step.id) {
         // case "sender":
         //     return <Sender { ...senderProps }/>   
@@ -169,6 +178,8 @@ const steps = [
         //     return <Payment {...paymentProps}/>
         case "international":
             return <InternationalForm {...internationalProps}/>
+        case "summary":
+            return <Confirmation {...summaryProps}/>
         
     }
 
