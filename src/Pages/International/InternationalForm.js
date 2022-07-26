@@ -9,9 +9,8 @@ import {useNavigate} from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Moment from "moment";
-//import {validateSender} from "../../Helpers/Validation/senderValidation";
 import ReactLoading from 'react-loading';
-// import { Typeahead } from 'react-bootstrap-typeahead';
+import reCAPTCHA from "react-google-recaptcha"
 
 
 //assets
@@ -1041,6 +1040,13 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             </table>
                         </div>
                 </>}
+
+                    {/* <div className='row mb-4'>
+                        <reCAPTCHA 
+                            sitekey={process.env.REACT_APP_SITE_KEY}
+                        />
+                    </div> */}
+                    
                     
                     <div className='row mb-6'>
                         <div className="col-6 left mt-3">
