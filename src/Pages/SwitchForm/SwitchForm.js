@@ -9,7 +9,7 @@ const senderDetails = {
     sender_lastname: "",
     sender_middlename: "",
     sender_suffix:"",
-    sender_country: "PH",
+    sender_country: "",
     sender_state_code: "",
     sender_city:"",
     sender_postal:"",
@@ -66,6 +66,8 @@ const steps = [
     const [loading, setLoading] = useState(false);
     const [searchingRecipient, setSearchingRecipient] = useState(false);
     const [singleSelections, setSingleSelections] = useState([]);
+    const [singleSelectionsSender, setSingleSelectionsSender] = useState([]);
+    const [singleSelectionsRecipient, setSingleSelectionsRecipient] = useState([]);
     const [stateSelections, setStateSelections] = useState([]);
     const [citiesSelections, setCitiesSelections] = useState([]);
 
@@ -143,7 +145,17 @@ const steps = [
         setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections, addActualWeight, setAddActualWeight, itemTotals, setItemTotals, navigation}
     const paymentProps = {type, generalDetails, transactionDetails, navigation}
     const summaryProps = {sender, recipient, upperDetails, packageDetails, transactionDetails, navigation}
-    const internationalProps = {sender, setSender, provinceSelections, setProvinceSelections, citySelections, setCitySelections, isItem, setIsItem, isDocument, setIsDocument, upperDetails, setUpperDetails, sendDetails, setSendDetails, navigation}
+
+    const internationalProps = {sender, setSender, hasResult, setHasResult, result, setResult, searchingSender, setSearchingSender, provinceSelections, 
+                                setProvinceSelections, navigation, recipient, setRecipient, postalAware, setPostalAware, 
+                                loading, setLoading, searchingRecipient, setSearchingRecipient, singleSelections, setSingleSelections, stateSelections, 
+                                setStateSelections, dial_code, setDialcode, index, item, setItem, setIndex, packageDetails, setPackageDetails, sendDetails, 
+                                setSendDetails, upperDetails, setUpperDetails, data, setData, maxWeight, maxLength, setMaxLength, setMaxWeight, maxWidth, setMaxWidth, 
+                                maxHeight, setMaxHeight, documentCustoms, setDocumentCustoms, documentDesc, setDocumentDesc, documentType, setDocumentType, 
+                                documentWeight, setDocumentWeight, isItem, setIsItem, isDocument, setIsDocument, loadingPackage, setLoadingPackage, searchingItem, 
+                                setSearchingItem, setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections, addActualWeight, 
+                                setAddActualWeight, itemTotals, setItemTotals, type, generalDetails, transactionDetails, upperDetails, packageDetails, singleSelectionsSender, 
+                                setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient}
     switch (step.id) {
         // case "sender":
         //     return <Sender { ...senderProps }/>   
