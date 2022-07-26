@@ -165,9 +165,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
             total_weight, 
         } = upperDetails
 
-        console.log(sender)
-        console.log(recipient)
-        console.log(recipient)
+        // console.log(sender)
+        // console.log(recipient)
 
         //static country
         const countries = [

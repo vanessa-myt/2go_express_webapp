@@ -163,7 +163,7 @@ const steps = [
                                 setAddActualWeight, itemTotals, setItemTotals, type, generalDetails, transactionDetails, upperDetails, packageDetails, singleSelectionsSender, 
                                 setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient}
 
-    const summaryProps = {sender, recipient, upperDetails, packageDetails, transactionDetails, navigation}
+    const summaryProps = {sender, recipient, upperDetails, packageDetails, transactionDetails, isItem, setIsItem, isDocument, setIsDocument, navigation }
 
     switch (step.id) {
         // case "sender":

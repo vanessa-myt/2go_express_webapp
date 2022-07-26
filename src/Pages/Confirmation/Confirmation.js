@@ -8,7 +8,9 @@ import { Navigate } from 'react-router-dom';
 import "./Confirmation.css";
 import delivery from "../../Assets/Images/Form/delivery.png"
 
-function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDetails, transactionDetails, navigation}) {
+function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDetails, transactionDetails, isDocument, 
+                setIsDocument, navigation}) 
+{
     const [agree ,setAgree] = useState(true);
     const [redirect, setRedirect] = useState("");
 
@@ -35,6 +37,15 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
 
     if(redirect === "back") {
         return <Navigate to="/"/>
+    }
+
+    if(upperDetails.detail_type === "item"){
+        setIsItem(true);
+        setIsDocument(false);
+    }
+    else {
+        setIsItem(false);
+        setIsDocument(true);
     }
 
     console.log(sender)
@@ -119,7 +130,7 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
                             </div>
                             <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                    {sender.sender_address1}    
+                                    {sender.sender_address2}    
                                 </span>
                             </div>
                         </div>
@@ -141,7 +152,7 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
                             </div>
                             <div className="col-sm-6 left">
                                 <span className="text span-summary">
-                                    {sender.sender_address1}
+                                    {sender.sender_contact_no}
                                 </span>
                             </div>
                         </div>
@@ -300,122 +311,247 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
 
                 </div>
 
+                {isItem &&
+                <>
                 <div className="row mt-5">
                     <div className="col-sm-6">
                         <p className="input-subtitle left pink-txt  x-large">Package Details</p>
                     </div>
                     <hr></hr>
                 </div>
+                </> }
 
                 <div className="row mb-4">
                     {/* PACKAGE DETAILS */}
                     <div className="col-6">
                         <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Ship Service:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">What are you Sending:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Invoice for Customs:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Package Type:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Shipment Purpose:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Max Weight:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Pickup/Drop Off:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Dimension:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
 
+                        {isDocument &&
+                        <>
+                            <div className="col-sm-6">
+                                <p className="input-subtitle left pink-txt  x-large">Package Details</p>
+                            </div>
+                            <hr></hr>
+                            </>}
+
+                            <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Ship Service:</p>
+                                </div>
+                                <div className="col-sm-6 left">
+                                    <span className="text span-summary">
+                                        {upperDetails.service_type}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">What are you Sending:</p>
+                                </div>
+                                <div className="col-sm-6 left">
+                                    <span className="text span-summary">
+                                        {upperDetails.detail_type}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Package Type:</p>
+                                </div>
+                                <div className="col-sm-6 left">
+                                    <span className="text span-summary">
+                                        {upperDetails.packing_type}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Max Weight:</p>
+                                </div>
+                                <div className="col-sm-6 left">
+                                    <span className="text span-summary">
+                                        {upperDetails.total_weight}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Dimension:</p>
+                                </div>
+                                <div className="col-sm-6 left">
+                                    <span className="text span-summary">
+                                        {packageDetails.length + " x " + packageDetails.width + " x " + packageDetails.height + " cm" } 
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Pickup/Drop Off:</p>
+                                </div>
+                                <div className="col-sm-6 left">
+                                    <span className="text span-summary">
+                                        {/* {upperDetails.service_type} */}
+                                    </span>
+                                </div>
+                            </div>
+                            
+
+                            {isItem &&<>
+                                <div className="col-sm-6"></div>
+                                    <div className="row mt-2">
+                                    <div className="col-sm-6">
+                                        <p className="input-subtitle grey-txt">Invoice for Customs:</p>
+                                    </div>
+                                    <div className="col-sm-6 left">
+                                        <span className="text span-summary">
+                                            {upperDetails.customs_invoice}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="col-sm-6"></div>
+                                    <div className="row mt-2">
+                                    <div className="col-sm-6">
+                                        <p className="input-subtitle grey-txt">Shipment Purpose:</p>
+                                    </div>
+                                    <div className="col-sm-6 left">
+                                        <span className="text span-summary">
+                                            {upperDetails.purpose}
+                                        </span>
+                                    </div>
+                                </div>
+                            </>}
+
+                            {isDocument && <>
+                                <div className="col-sm-6"></div>
+                                    <div className="row mt-2">
+                                    <div className="col-sm-6">
+                                        <p className="input-subtitle grey-txt">Type of Document:</p>
+                                    </div>
+                                    <div className="col-sm-6 left">
+                                        <span className="text span-summary">
+                                            {/* {upperDetails.service_type} */}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="col-sm-6"></div>
+                                    <div className="row mt-2">
+                                    <div className="col-sm-6">
+                                        <p className="input-subtitle grey-txt">Document Description:</p>
+                                    </div>
+                                    <div className="col-sm-6 left">
+                                        <span className="text span-summary">
+                                            {} 
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="row mt-2">
+                                    <div className="col-sm-6">
+                                        <p className="input-subtitle grey-txt">Customs Value(PHP):</p>
+                                    </div>
+                                    <div className="col-sm-6 left">
+                                        <span className="text span-summary">
+                                            {} 
+                                        </span>
+                                    </div>
+                                </div>
+                            </>}
+                            
+                        </div>
+
+                    {isDocument && <>
+                        <div className="col-6">
+                            <div className="col-sm-6">
+                                <p className="input-subtitle left pink-txt x-large">Payment</p>
+                            </div>
+                            <hr></hr>
+
+                            <div className="row">
+                                {/* PACKAGE DETAILS */}
+                                <div className="col">
+                                    <div className="col-sm-6"></div>
+                                        <div className="row mt-2">
+                                        <div className="col-sm-6">
+                                            <p className="input-subtitle grey-txt">Base Rate:</p>
+                                        </div>
+                                        <div className="col-sm-6 left">
+                                            <span className="text span-summary">
+                                            {"1000.00"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="col-sm-6"></div>
+                                        <div className="row mt-2">
+                                        <div className="col-sm-6">
+                                            <p className="input-subtitle grey-txt">Surcharge:</p>
+                                        </div>
+                                        <div className="col-sm-6 left">
+                                            <span className="text span-summary">
+                                            {"1000.00"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="col-sm-6"></div>
+                                        <div className="row mt-2">
+                                        <div className="col-sm-6">
+                                            <p className="input-subtitle grey-txt">Discount Amount:</p>
+                                        </div>
+                                        <div className="col-sm-6 left">
+                                            <span className="text span-summary">
+                                            {"1000.00"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="col-sm-6"></div>
+                                        <div className="row mt-2">
+                                        <div className="col-sm-6">
+                                            <p className="input-subtitle grey-txt">Subtotal:</p>
+                                        </div>
+                                        <div className="col-sm-6 left">
+                                            <span className="text span-summary">
+                                            {"1000.00"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="col-sm-6"></div>
+                                        <div className="row mt-2">
+                                        <div className="col-sm-6">
+                                            <p className="input-subtitle grey-txt">VAT:</p>
+                                        </div>
+                                        <div className="col-sm-6 left">
+                                            <span className="text span-summary">
+                                            {"1000.00"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="col-sm-6"></div>
+                                        <div className="row mt-2">
+                                        <div className="col-sm-6">
+                                            <p className="input-subtitle grey-txt x-large">AMOUNT DUE:</p>
+                                        </div>
+                                        <div className="col-sm-6 left">
+                                            <span className="input-subtitle orange-txt x-large">
+                                                PHP
+                                                1000.00
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+
+
+                            </div>
+
+                        </div>
+                    </> }
+                    
+
+                    {isItem &&
+                    <> 
                     <div className="col-6">
                         <div className='row container-fluid table-overflow'>
                             <table className="table table-bordered table-hover item-table mt-3">
@@ -453,102 +589,108 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
                             </table>
                         </div>
                     </div>
-
+                    </>}
 
                 </div>
-
-                <div className="row mt-5">
-                    <div className="col-sm-6">
-                        <p className="input-subtitle left pink-txt x-large">Payment</p>
-                    </div>
-                    <hr></hr>
-                </div>
-
-                <div className="row mb-4">
-                    {/* PACKAGE DETAILS */}
-                    <div className="col-6">
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Base Rate:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Surcharge:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Discount Amount:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">Subtotal:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt">VAT:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="text span-summary">
-                                {/* {sender.sender_firstname +
-                                    " " +
-                                sender.sender_lastname} */}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="col-sm-6"></div>
-                            <div className="row mt-2">
-                            <div className="col-sm-6">
-                                <p className="input-subtitle grey-txt x-large">AMOUNT DUE:</p>
-                            </div>
-                            <div className="col-sm-6">
-                                <span className="input-subtitle orange-txt x-large">
-                                    PHP
-                                    1000.00
-                                </span>
-                            </div>
-                        </div>
                 
+                {isItem && <>
+                    <div className="row mt-5">
+                        <div className="col-sm-6">
+                            <p className="input-subtitle left pink-txt x-large">Payment</p>
+                        </div>
+                        <hr></hr>
                     </div>
 
+                    <div className="row mb-4">
+                        {/* PACKAGE DETAILS */}
+                        <div className="col-6">
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Base Rate:</p>
+                                </div>
+                                <div className="col-sm-6">
+                                    <span className="text span-summary">
+                                    {/* {sender.sender_firstname +
+                                        " " +
+                                    sender.sender_lastname} */}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Surcharge:</p>
+                                </div>
+                                <div className="col-sm-6">
+                                    <span className="text span-summary">
+                                    {/* {sender.sender_firstname +
+                                        " " +
+                                    sender.sender_lastname} */}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Discount Amount:</p>
+                                </div>
+                                <div className="col-sm-6">
+                                    <span className="text span-summary">
+                                    {/* {sender.sender_firstname +
+                                        " " +
+                                    sender.sender_lastname} */}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">Subtotal:</p>
+                                </div>
+                                <div className="col-sm-6">
+                                    <span className="text span-summary">
+                                    {/* {sender.sender_firstname +
+                                        " " +
+                                    sender.sender_lastname} */}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt">VAT:</p>
+                                </div>
+                                <div className="col-sm-6">
+                                    <span className="text span-summary">
+                                    {/* {sender.sender_firstname +
+                                        " " +
+                                    sender.sender_lastname} */}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="col-sm-6"></div>
+                                <div className="row mt-2">
+                                <div className="col-sm-6">
+                                    <p className="input-subtitle grey-txt x-large">AMOUNT DUE:</p>
+                                </div>
+                                <div className="col-sm-6">
+                                    <span className="input-subtitle orange-txt x-large">
+                                        PHP
+                                        1000.00
+                                    </span>
+                                </div>
+                            </div>
+                    
+                        </div>
 
-                </div>
+
+                    </div>
+
+                </>}
+                
+
+                
               
                 <div className="row mt-5"> 
                     <div className="col">
