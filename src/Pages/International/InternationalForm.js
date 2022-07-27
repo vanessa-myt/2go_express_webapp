@@ -11,7 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Moment from "moment";
 import ReactLoading from 'react-loading';
-import reCAPTCHA from "react-google-recaptcha"
+import ReCAPTCHA from "react-google-recaptcha"
 
 
 //assets
@@ -94,6 +94,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     const [editItem, setEditItem] = useState({});
     const [itemID, setItemID] = useState(0);
     const [agree ,setAgree] = useState(true)
+    const [captcha ,setCaptcha] = useState(false)
 
     
     let packageNumber = 1;
@@ -591,6 +592,18 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         }
       }
 
+      function recaptchaCallback(){
+          setCaptcha(true)
+      }
+      
+    //   function isCaptchaChecked() {
+    //     return grecaptcha && grecaptcha.getResponse().length !== 0;
+    //   }
+
+
+
+      console.log(captcha)
+
     const handleSaveItem=(e)=>{
         setIndex(index+1)
         var totalqty=0, totalweight=0, totalcustoms=0
@@ -710,7 +723,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             }
                         }
                         else {
-                            toast.error("PLEASE CHECK AGREE TO THE TERMS AND CONDITIONS",{ autoClose: 4000, hideProgressBar: true })
+                            toast.error("PLEASE CHECK CAPTCHA AND AGREE TO THE TERMS AND CONDITIONS",{ autoClose: 4000, hideProgressBar: true })
                         }
                     }
                     else{
@@ -1375,11 +1388,19 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                     <InputError isValid={isPackageError.data} message={'Item Detail is required*'}/>
                 </>}
 
-                    {/* <div className='row mb-4'>
-                        <reCAPTCHA 
-                            sitekey={process.env.REACT_APP_SITE_KEY}
-                        />
-                    </div> */}
+                    <div className='row mb-4'>
+                        <div className='col-4'></div>
+                        <div className='col-4'>
+                            <ReCAPTCHA 
+                                sitekey="6Lc4EiQhAAAAAOgVr1rGx6VUoM9z5fNk0zyPgnzY"
+                                data-callback="recaptchaCallback"
+                                onClick={recaptchaCallback}
+                            />
+                            
+                        </div>
+
+                        
+                    </div>
                     
                     
                     <div className='row mb-6'>

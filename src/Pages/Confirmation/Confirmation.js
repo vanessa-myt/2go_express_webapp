@@ -714,6 +714,7 @@ function Summary({sender, setSender, recipient, setRecipient, provinceSelections
                         </div>
                     </div>
                 </div>
+                
     
                 <div className="container">
                     <div className="row mb-4 justify-content-end">
