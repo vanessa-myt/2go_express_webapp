@@ -8,6 +8,12 @@ header {
     height: 65%;
 }
 
+.item-modal-header{
+    background-color: #2A96C6;
+    color:white;
+    font-weight: bold;
+}
+
 .modal-input-date-input-reports-date {
     position: fixed;
     width: 13%;

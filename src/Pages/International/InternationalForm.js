@@ -93,7 +93,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     const [isCustomPackaging, setIsCustomPackaging] = useState(false);
     const [editItem, setEditItem] = useState({});
     const [itemID, setItemID] = useState(0);
+    const [agree ,setAgree] = useState(true)
+
     
+    let packageNumber = 1;
+    let item_weights = 0
+    let count = 1;    
+    let item_customs = 0
+
 
     if (shipdate === "" ) {
         setShipDate(Moment().format("YYYY-MM-DD"));
@@ -575,12 +582,22 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         setSearchInput("")
     }
 
+    const handleAgreeChange=(e)=>{
+        if(e.target.checked){
+          setAgree(true)
+        }
+        else{
+          setAgree(false)
+        }
+      }
+
     const handleSaveItem=(e)=>{
         setIndex(index+1)
         var totalqty=0, totalweight=0, totalcustoms=0
         var newdata
         if(e.target.value === "add_item"){
-            item["id"] = index+1
+            if(validateItemDetails(item, setIsItemError)) {
+                item["id"] = index+1
                 if(item.new_item_profile === "" || item.new_item_profile === undefined){
                     setItem({new_item_profile:"0"})    
                 }
@@ -589,17 +606,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                 setItem({unit:"PCS", new_item_profile:"0", hs_code:""})
                 setItemModal(false);
                 setCountrySelections([])
-            // if(validateItemDetails(item, setIsItemError)) {
-            //     item["id"] = index+1
-            //     if(item.new_item_profile === "" || item.new_item_profile === undefined){
-            //         setItem({new_item_profile:"0"})    
-            //     }
-            //     setData([...data, item]);
-            //     newdata = [...data, item]
-            //     setItem({unit:"PCS", new_item_profile:"0", hs_code:""})
-            //     setItemModal(false);
-            //     setCountrySelections([])
-            // }
+            }
            
         }
         if(e.target.value === "edit_item"){
@@ -640,13 +647,75 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         {
             if(recipient.recipient_firstname !== "" || recipient.recipient_company !== "") {
                 if(validateSender(sender, recipient, singleSelectionsSender, singleSelectionsRecipient , setIsError)){
-                    // setRedirect("next")
-                    toast.success("REDIRECTING TO CONFIRMATION...", { autoClose: 2000, hideProgressBar: true })
-                    setTimeout(()=>{
-                         navigation.next()
-                        // setRedirect("next")
-                    //   navigateto('/fedex/package', {state: {sender_details: state.sender_details, recipient_details: recipient}})     
-                    }, 2000)
+                    console.log(validatePackage(upperDetails, documentCustoms, documentDesc, documentType, documentWeight, maxWeight, data, setIsPackageError))
+                    if(validatePackage(upperDetails, documentCustoms, documentDesc, documentType, documentWeight, maxWeight, data, setIsPackageError))
+                    {
+                        if(agree) 
+                        {
+                            toast.success("REDIRECTING TO CONFIRMATION...", { autoClose: 2000, hideProgressBar: true })
+                            setTimeout(()=>{
+                                navigation.next()    
+                            }, 2000)
+                            console.log("pisti")
+                            if(upperDetails["detail_type"]==="item"){
+                                data.forEach(data => {
+                                    for (let key in data) {
+                                        if(key != "id"){
+                                            if(data["new_item_profile"] === undefined || data["new_item_profile"] === ""){
+                                                data["new_item_profile"] = "0"
+                                            }
+                                            sendDetails[`${key}_${packageNumber}_${count}`] = `${data[key]}`;
+                                        }
+                                    }
+                                    count++
+                                });
+                                data.forEach(data => {
+                                        item_weights += parseFloat(data.weight);
+                                        item_customs += parseFloat(data.customs_value);
+                                });
+                                packageDetails["total_package_content_1"] = data.length.toString()
+                                packageDetails["total_customs_value_1"] = item_customs
+                                upperDetails["total_weight"] = item_weights
+                            }
+                            else{
+                                sendDetails[`description_${packageNumber}_${packageNumber}`]=documentDesc
+                                sendDetails[`document_type_${packageNumber}_${packageNumber}`]=documentType
+                                sendDetails[`customs_value_${packageNumber}_${packageNumber}`]=documentCustoms
+                                upperDetails["purpose"] = "";
+                                packageDetails["total_package_content_1"] = "1"
+                                packageDetails["total_customs_value_1"] = documentCustoms
+                                //   item_weights = parseFloat(maxWeight);
+                                
+                                if(upperDetails.packaging_type === "11"){
+                                    upperDetails["total_weight"] = documentWeight
+                                    item_weights = documentWeight
+                                }
+                                else{
+                                    item_weights = "0.5";
+                                    upperDetails["total_weight"] = item_weights
+                                }
+                            }
+                            //   upperDetails["total_weight"] = parseFloat(upperDetails["total_weight"])+parseFloat(maxWeight) //to be transferred to add package button function
+                        
+                            if(parseFloat(item_weights) > parseFloat(maxWeight) && upperDetails.packaging_type !== "11"){
+                                setLoadingPackage(false)
+                                //toast.error("THE TOTAL UNIT OF ITEMS EXCEEDS THE PACKAGE WEIGHT.",{ autoClose: 4000, hideProgressBar: true })
+                            }
+                            else{
+                                setLoadingPackage(true)
+
+                                packageDetails["weight_1"] = item_weights.toString()
+                                upperDetails["total_weight"] = upperDetails["total_weight"].toString()
+                            // _attemptcreateTransaction()
+                            }
+                        }
+                        else {
+                            toast.error("PLEASE CHECK AGREE TO THE TERMS AND CONDITIONS",{ autoClose: 4000, hideProgressBar: true })
+                        }
+                    }
+                    else{
+                        setLoadingPackage(false)
+                    }
                 } 
             }
             else{
@@ -664,6 +733,51 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         //     toast.error("PLEASE COMPLETE ALL REQUIRED FIELDS.");
         // }
     }
+
+    // async function _attemptcreateTransaction(){
+    //     if(maxWeight != ""){
+    //         setLoadingPackage(true)
+    //         const response = await createFedexTransac(sender, recipient, 
+    //                                                 upperDetails, sendDetails, packageDetails)
+    //         if(response.error){
+    //             if(response.error.data?.messages?.error === "API key or token not authorized."){
+    //                 removeUserSession();
+    //             }
+    //             else{
+    //                 if(Array.isArray(response.error.data.messages.errors)){
+    //                     toast.error(response.error.data?.messages?.errors[0].code?.toUpperCase()+": "+response.error.data?.messages?.errors[0].message.toUpperCase(),{ autoClose: 4000, hideProgressBar: true })
+    //                 }
+    //                 else{
+    //                     toast.error(response.error.data?.messages?.error.toUpperCase(),{ autoClose: 4000, hideProgressBar: true })
+    //                 }
+                    
+    //                 setSendDetails([])
+    //                 setLoadingPackage(false)
+    //                 // setIsClicked(false)
+    //             }
+    //         }
+    //         if(response.data){
+    //             setGeneralDetails({
+    //                 detail_type: upperDetails["detail_type"],
+    //                 package_type: upperDetails["packaging_type"],
+    //                 service_type: upperDetails["service_type"],
+    //                 service_id: "1"
+    //             })
+    //             setTransactionDetails({...response.data})
+    //             setType("fedex")
+    //             // generalDetails["detail_type"] = upperDetails["detail_type"]
+    //             // generalDetails["package_type"] = upperDetails["packaging_type"]
+    //             // generalDetails["service_type"] = upperDetails["service_type"]
+    //             // generalDetails["service_id"] = "1"
+    //             toast.success("YOUR TRANSACTION WAS CREATED SUCCESSFULLY! REDIRECTING YOU TO PAYMENTS...",{ autoClose: 2000, hideProgressBar: true })
+    //             setTimeout(() => {
+    //                 navigation.next()
+    //                 setLoadingPackage(false)
+    //                 // navigateto("/payment/fedex", {state: {transactionDetails: response.data, generalDetails:generalDetails}})
+    //             }, 4000);
+    //         }
+    //     }
+    // }
 
     if(redirect === "next") {
         return <Navigate to="/Confirmation"/>
@@ -1019,11 +1133,12 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         onChange={handlePackageChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
+                                        <option value="">Select</option>
                                         <option value="custom">Custom</option>
                                         <option value="letter">Letter</option>
                                         <option value="box">box</option>
-
                                     </select>
+                                    <InputError isValid={isPackageError.packaging_type} message={'Package type is required*'}/>
                                 </div>
                             </div>
                             <div className="col-4">
@@ -1083,11 +1198,12 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         onChange={handlePackageChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
+                                        <option value="">Select</option>
                                         <option value="custom">Custom</option>
                                         <option value="letter">Letter</option>
                                         <option value="box">box</option>
-
                                     </select>
+                                    <InputError isValid={isPackageError.packaging_type} message={'Package type is required*'}/>
                                 </div>
                             </div>
                         </>}
@@ -1156,22 +1272,22 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                             <option value="Interoffice">Interoffice (e.g. memo)</option>
                                             <option value="Business">Business (e.g. contract)</option>
                                             <option value="Others">Others</option>
-
                                         </select>
+                                        <InputError isValid={isPackageError.documentType} message={'Package type is required*'}/>
                                     </div>
                                 </div>
                                 <div className="col-4 ">
                                     <div className="form-group border-grey">
                                         <p className='input-subtitle'>Document Description<span className='required-icon'>*</span></p>
                                         <input type="text" className="form-control bg-grey" aria-label="max-weight" name="description" value={documentDesc} onChange={handleDocumentChange}/>
-                                        <InputError isValid={isError.documentDesc} message={'Document description is required*'}/>
+                                        <InputError isValid={isPackageError.documentDesc} message={'Document description is required*'}/>
                                     </div>
                                 </div>
                                 <div className="col-4 ">
                                     <div className="form-group border-grey">
                                         <p className='input-subtitle'>Customs Value<span className='required-icon'>*</span></p>
                                         <input type="number" className="form-control bg-grey" aria-label="max-weight" name="customs_value"  value={documentCustoms} onChange={handleDocumentChange}/>
-                                        <InputError isValid={isError.documentCustoms} message={'Customs value is required*'}/>
+                                        <InputError isValid={isPackageError.documentCustoms} message={'Customs value is required*'}/>
                                     </div>
                                 </div>
                             </div>
@@ -1217,45 +1333,46 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                     </div>
                 
-                        <div className='row container-fluid table-overflow'>
-                            <table className="table table-bordered table-hover item-table mt-3">
-                                <thead className="item-table-headers">
-                                    <tr>
-                                        {headers.map((row) => (
-                                                <th align="left" scope="col">{row.label}</th>
-                                            ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data?.map((row, index) => (
-                                    <tr key={index}
-                                    >
-                                        <td align="left" className='input-subtitle'>{row.description}</td>
-                                        <td align="left" className='input-subtitle'>{row.hs_code}</td>
-                                        <td align="left" className='input-subtitle'>{row.made_in}</td>
-                                        <td align="center" className='input-subtitle'>{row.qty}</td>
-                                        <td align="center" className='input-subtitle'>{row.unit}</td>
-                                        <td align="center" className='input-subtitle'>{row.weight}</td>
-                                        <td align="center" className='input-subtitle'>{row.customs_value}</td>
-                                        <td align="center" style={{display:"flex", justifyContent:"space-around"}}>
-                                            <img src={editicon} className="tb-icons" name={row.hs_code} onClick={()=>handleItemEdit(row.id)}/>
-                                            <img src={deleteicon} className="tb-icons" name={row.hs_code} onClick={()=>handleItemDelete(row.id)}/>
-                                        </td>
-                                    </tr>
-                                    ))}
-                                </tbody>
-                                <tfoot className="item-table-headers">
-                                    <tr style={{backgroundColor:"#EFEFEF"}}>
-                                        <td colspan="3" align="right" className='input-subtitle blue-txt'>TOTAL:</td>
-                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalQty}</td>
-                                        <td align="right" className='input-subtitle blue-txt'>-</td>  
-                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalWeight}</td>  
-                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalCustoms}</td>  
-                                        <td align="right" className='input-subtitle blue-txt'>-</td>  
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+                    <div className='row container-fluid table-overflow'>
+                        <table className="table table-bordered table-hover item-table mt-3">
+                            <thead className="item-table-headers">
+                                <tr>
+                                    {headers.map((row) => (
+                                            <th align="left" scope="col">{row.label}</th>
+                                        ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data?.map((row, index) => (
+                                <tr key={index}
+                                >
+                                    <td align="left" className='input-subtitle'>{row.description}</td>
+                                    <td align="left" className='input-subtitle'>{row.hs_code}</td>
+                                    <td align="left" className='input-subtitle'>{row.made_in}</td>
+                                    <td align="center" className='input-subtitle'>{row.qty}</td>
+                                    <td align="center" className='input-subtitle'>{row.unit}</td>
+                                    <td align="center" className='input-subtitle'>{row.weight}</td>
+                                    <td align="center" className='input-subtitle'>{row.customs_value}</td>
+                                    <td align="center" style={{display:"flex", justifyContent:"space-around"}}>
+                                        <img src={editicon} className="tb-icons" name={row.hs_code} onClick={()=>handleItemEdit(row.id)}/>
+                                        <img src={deleteicon} className="tb-icons" name={row.hs_code} onClick={()=>handleItemDelete(row.id)}/>
+                                    </td>
+                                </tr>
+                                ))}
+                            </tbody>
+                            <tfoot className="item-table-headers">
+                                <tr style={{backgroundColor:"#EFEFEF"}}>
+                                    <td colspan="3" align="right" className='input-subtitle blue-txt'>TOTAL:</td>
+                                    <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalQty}</td>
+                                    <td align="right" className='input-subtitle blue-txt'>-</td>  
+                                    <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalWeight}</td>  
+                                    <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalCustoms}</td>  
+                                    <td align="right" className='input-subtitle blue-txt'>-</td>  
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <InputError isValid={isPackageError.data} message={'Item Detail is required*'}/>
                 </>}
 
                     {/* <div className='row mb-4'>
@@ -1268,10 +1385,10 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                     <div className='row mb-6'>
                         <div className="col-6 left mt-3">
                             <div className="form-group">
-                                <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability"/>
+                                <input type="checkbox" className="custom-control-inpu mr-10 " id="agreement" name="agreement" checked={agree} onChange={handleAgreeChange}/>
                                 {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
                                 {/* <p className='input'>Dimensions</p> */}
-                                <label className="custom-control-label input-subtitle pad-left5" htmlFor="purchase-limit">I agree of the </label>
+                                <label className="custom-control-label input-subtitle pad-left5" htmlFor="purchase-limit">I agree to the </label>
                                 <a> </a>
                                 <a className='pink-text'>Terms and conditions</a>
                             </div> 
@@ -1306,8 +1423,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                 show={itemModal}
                 onHide={handleModalClose}
                 >
-                    <Modal.Header closeButton className="item-modal-header">
-                        <Modal.Title id="contained-modal-title-vcenter" className='fw-bold'>
+                    <Modal.Header closeButton className="item-modal-header center">
+                        <Modal.Title id="contained-modal-title-vcenter" className='fw-bold center'>
                             ITEM FORM        
                         </Modal.Title>
                     </Modal.Header>
@@ -1351,7 +1468,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <input type="text" className="form-control" aria-label="description" name="description" value={item.description} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.description} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
-                                    {/* <InputError isValid={isItemError.description} message={'Description is required*'}/> */}
+                                    <InputError isValid={isItemError.description} message={'Description is required*'}/>
                                 </div>
                             </div>
                         </div>
@@ -1367,7 +1484,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <input type="text" className="form-control" aria-label="hs_code" name="hs_code" value={item.hs_code} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.hs_code} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
-                                    {/* <InputError isValid={isItemError.hs_code} message={'HS Code is required*'}/> */}
+                                    <InputError isValid={isItemError.hs_code} message={'HS Code is required*'}/>
                                 </div>
                             </div>
                         </div>
@@ -1394,7 +1511,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     </Form.Select> */}
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.made_in} message={'Made in is required*'}/> */}
+                                <InputError isValid={isItemError.made_in} message={'Made in is required*'}/>
                             </div>
                             
                             <div className="col-2">
@@ -1412,7 +1529,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         </div>
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.weight} message={'Weight is required*'}/> */}
+                                <InputError isValid={isItemError.weight} message={'Weight is required*'}/>
                             </div>
                         </div>
                         <div className="row mb-4">
@@ -1428,7 +1545,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         {/* value={item.qty} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.qty} message={'Qty is required*'}/> */}
+                                <InputError isValid={isItemError.qty} message={'Qty is required*'}/>
                             </div>
                             <div className="col-2">
                                 <div className="form-group">
@@ -1444,7 +1561,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     </Form.Select>
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.unit} message={'Unit is required*'}/> */}
+                                <InputError isValid={isItemError.unit} message={'Unit is required*'}/>
                             </div>
                         </div>
                         <div className="row mb-4">
@@ -1459,7 +1576,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <input type="number" className="form-control" aria-label="customs_value" name="customs_value" value={item.customs_value} onChange={(e)=>handleItemChange(e)}/>
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.customs_value} message={'Customs value is required*'}/> */}
+                                <InputError isValid={isItemError.customs_value} message={'Customs value is required*'}/>
                             </div>
                         </div>
                         <div className="row">
@@ -1490,7 +1607,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                 onHide={handleEditModalClose}
                 >
                 <Modal.Header closeButton className="item-modal-header">
-                    <Modal.Title id="contained-modal-title-vcenter" className='fw-bold'>
+                    <Modal.Title id="contained-modal-title-vcenter" className='fw-bold center'>
                         ITEM FORM        
                     </Modal.Title>
                     </Modal.Header>
@@ -1534,7 +1651,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <input type="text" className="form-control" aria-label="description" name="description" value={editItem.description} onChange={(e)=>handleEditItemChange(e)}/>
                                         {/* value={editItem.description} onChange={(e)=>handleEditItemChange(e)} */}
                                     </div>
-                                    {/* <InputError isValid={isItemError.description} message={'Description is required*'}/> */}
+                                    <InputError isValid={isItemError.description} message={'Description is required*'}/>
                                 </div>
                             </div>
                         </div>
@@ -1550,7 +1667,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <input type="text" className="form-control" aria-label="hs_code" name="hs_code" value={editItem.hs_code} onChange={handleEditItemChange} />
                                         {/* value={editItem.hs_code} onChange={handleEditItemChange} */}
                                     </div>
-                                    {/* <InputError isValid={isItemError.hs_code} message={'HS Code is required*'}/> */}
+                                    <InputError isValid={isItemError.hs_code} message={'HS Code is required*'}/>
                                 </div>
                             </div>
                         </div>
@@ -1573,7 +1690,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     />
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.made_in} message={'Made in is required*'}/> */}
+                                <InputError isValid={isItemError.made_in} message={'Made in is required*'}/>
                             </div>
                             <div className="col-2">
                                 <div className="form-group">
@@ -1589,7 +1706,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         </div>
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.weight} message={'Weight is required*'}/> */}
+                                <InputError isValid={isItemError.weight} message={'Weight is required*'}/>
                             </div>
                         </div>
                         <div className="row mb-4">
@@ -1604,7 +1721,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <input type="number" className="form-control" aria-label="qty" name="qty" value={editItem.qty} onChange={(e)=>handleEditItemChange(e)} />
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.qty} message={'Qty is required*'}/> */}
+                                <InputError isValid={isItemError.qty} message={'Qty is required*'}/>
                             </div>
                             <div className="col-2">
                                 <div className="form-group">
@@ -1620,7 +1737,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     </Form.Select>
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.unit} message={'Unit is required*'}/> */}
+                                <InputError isValid={isItemError.unit} message={'Unit is required*'}/>
                             </div>
                         </div>
                         <div className="row mb-4">
@@ -1635,7 +1752,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <input type="number" className="form-control" aria-label="customs_value" name="customs_value" value={editItem.customs_value} onChange={(e)=>handleEditItemChange(e)} />
                                     </div>
                                 </div>
-                                {/* <InputError isValid={isItemError.customs_value} message={'Customs value is required*'}/> */}
+                                <InputError isValid={isItemError.customs_value} message={'Customs value is required*'}/>
                             </div>
                         </div>
                         <div className="row">

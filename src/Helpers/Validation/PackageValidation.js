@@ -22,21 +22,21 @@ export const validatePackage = (upperDetails, documentCustoms, documentDesc, doc
         isValidPackage = true;
     }
 
-    // if(documentCustoms === "") {
-    //     handleValidationChange("documentCustoms", true, setIsError);
-    //     isValidCustoms = false;
-    // } else {
-    //     handleValidationChange("documentCustoms", false, setIsError);
-    //     isValidCustoms = true;
-    // }
+    if(documentCustoms === "") {
+        handleValidationChange("documentCustoms", true, setIsError);
+        isValidCustoms = false;
+    } else {
+        handleValidationChange("documentCustoms", false, setIsError);
+        isValidCustoms = true;
+    }
 
-    // if(documentDesc === "") {
-    //     handleValidationChange("documentDesc", true, setIsError);
-    //     isValidDesc = false;
-    // } else {
-    //     handleValidationChange("documentDesc", false, setIsError);
-    //     isValidDesc = true;
-    // }
+    if(documentDesc === "") {
+        handleValidationChange("documentDesc", true, setIsError);
+        isValidDesc = false;
+    } else {
+        handleValidationChange("documentDesc", false, setIsError);
+        isValidDesc = true;
+    }
 
     if(documentType === "" || documentType === "Select") {
         handleValidationChange("documentType", true, setIsError);
