@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useStep } from "react-hooks-helper";
 import InternationalForm from "../International/InternationalForm";
 import Confirmation from "../Confirmation/Confirmation";
-import { formatDate, formatDateNoTime, getTodayDate } from "../../Helpers/Utils/Common";
+import { formatDate, formatDateNoTime, formatYMD, getTodayDate } from "../../Helpers/Utils/Common";
 
 function SwitchForm() {
 
-    const date = formatDateNoTime(getTodayDate());
+    const date = formatYMD(getTodayDate());
     // formatDateNoTime(date);
 
 const senderDetails = {
@@ -163,7 +163,16 @@ const steps = [
                                 setAddActualWeight, itemTotals, setItemTotals, type, generalDetails, transactionDetails, upperDetails, packageDetails, singleSelectionsSender, 
                                 setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient}
 
-    const summaryProps = {sender, recipient, upperDetails, packageDetails, transactionDetails, isItem, setIsItem, isDocument, setIsDocument, navigation }
+    const summaryProps = {sender, setSender, hasResult, setHasResult, result, setResult, searchingSender, setSearchingSender, provinceSelections, 
+                            setProvinceSelections, navigation, recipient, setRecipient, postalAware, setPostalAware, 
+                            loading, setLoading, searchingRecipient, setSearchingRecipient, singleSelections, setSingleSelections, stateSelections, 
+                            setStateSelections, dial_code, setDialcode, index, item, setItem, setIndex, packageDetails, setPackageDetails, sendDetails, 
+                            setSendDetails, upperDetails, setUpperDetails, data, setData, maxWeight, maxLength, setMaxLength, setMaxWeight, maxWidth, setMaxWidth, 
+                            maxHeight, setMaxHeight, documentCustoms, setDocumentCustoms, documentDesc, setDocumentDesc, documentType, setDocumentType, 
+                            documentWeight, setDocumentWeight, isItem, setIsItem, isDocument, setIsDocument, loadingPackage, setLoadingPackage, searchingItem, 
+                            setSearchingItem, setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections, addActualWeight, 
+                            setAddActualWeight, itemTotals, setItemTotals, type, generalDetails, transactionDetails, upperDetails, packageDetails, singleSelectionsSender, 
+                            setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient}
 
     switch (step.id) {
         // case "sender":

@@ -4,6 +4,7 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import 'bootstrap/dist/css/bootstrap.css';
 import { Navigate } from 'react-router-dom';
 import { validateSender } from '../../Helpers/Validation/InternationalFormValidation';
+import { validatePackage, validateItemDetails } from '../../Helpers/Validation/PackageValidation';
 import InputError from '../../Components/InputError/InputError';
 import {useNavigate} from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
@@ -90,6 +91,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     const [redirect, setRedirect] = useState("");
     const [shipdate, setShipDate] = useState("");
     const [isCustomPackaging, setIsCustomPackaging] = useState(false);
+    const [editItem, setEditItem] = useState({});
+    const [itemID, setItemID] = useState(0);
+    
 
     if (shipdate === "" ) {
         setShipDate(Moment().format("YYYY-MM-DD"));
@@ -166,11 +170,22 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
         // console.log(sender)
         // console.log(recipient)
+        // console.log(packageDetails)
+        // console.log(upperDetails)
+        console.log(item)
+        console.log(recipient.ship_date)
+        // console.log(documentCustoms)
+        // console.log(documentDesc)
+        // console.log(documentType)
+
+
 
         //static country
         const countries = [
             {name: "South Korea", alpha_code: "SK"},
             {name: "North Korea", alpha_code: "NK"},
+            {name: "Philippines", alpha_code: "PH"},
+
         ]
 
     //REQUIRED ERROR HANDLING
@@ -298,24 +313,63 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     }
 
     const handleItemEdit=(id)=>{
-        // setItemID(id)
-        // const newdata = [...data]
-        // const indexdata = data.findIndex((data)=> data.id === id)
-        // // setCountrySelections([{name:newdata[indexdata].made_in}])
-        // setEditItem({...editItem, 
-        //     id: newdata[indexdata].id,
-        //     description: newdata[indexdata].description,
-        //     hs_code: newdata[indexdata].hs_code?newdata[indexdata].hs_code:"",
-        //     made_in: newdata[indexdata].made_in,
-        //     qty: newdata[indexdata].qty,
-        //     unit: newdata[indexdata].unit,
-        //     weight: newdata[indexdata].weight,
-        //     customs_value: newdata[indexdata].customs_value,
-        //     new_item_profile: newdata[indexdata].new_item_profile
-        // })
-        // setCountrySelections([{name:countries.filter(data=> data.alpha_code === newdata[indexdata].made_in)[0].name}])
+        setItemID(id)
+        const newdata = [...data]
+        const indexdata = data.findIndex((data)=> data.id === id)
+        // setCountrySelections([{name:newdata[indexdata].made_in}])
+        setEditItem({...editItem, 
+            id: newdata[indexdata].id,
+            description: newdata[indexdata].description,
+            hs_code: newdata[indexdata].hs_code?newdata[indexdata].hs_code:"",
+            made_in: newdata[indexdata].made_in,
+            qty: newdata[indexdata].qty,
+            unit: newdata[indexdata].unit,
+            weight: newdata[indexdata].weight,
+            customs_value: newdata[indexdata].customs_value,
+            new_item_profile: newdata[indexdata].new_item_profile
+        })
+        setCountrySelections([{name:countries.filter(data=> data.alpha_code === newdata[indexdata].made_in)[0].name}])
         setIsEditing(true)
         setEditItemModal(true)
+    }
+
+    const handleEditItemChange=(e)=>{
+        const {name, value} = e.target;
+        if(name === "new_item_profile"){
+            if(e.target.checked){
+                setEditItem(prevState => ({
+                    ...prevState,
+                    ["new_item_profile"]: "1"
+                }))
+                // editItem["new_item_profile"] = "1"
+            }
+            else
+            {
+                setEditItem(prevState => ({
+                    ...prevState,
+                    ["new_item_profile"]: "0"
+                }))
+                // editItem["new_item_profile"] = "0"
+            }
+        }
+        else{
+            setEditItem(prevState => ({
+                ...prevState,
+                [name]: value
+            }))
+        }   
+    }
+
+    const handleMadeChange =(e) =>{
+        setCountrySelections(e)
+        if(e.length > 0){
+                countries.forEach((data)=>{
+                    if(data.name === e[0].name){
+                        setItem({...item, made_in:data.alpha_code})
+                    }
+                })
+        }
+
     }
 
     const handleSendType=(e)=>{
@@ -415,6 +469,64 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
     }
 
+    const handleDocumentChange=(e)=>{
+        const {name, value} = e.target;
+        if(name === "customs_value"){
+            setDocumentCustoms(value)
+        }
+        if(name === "description"){
+            setDocumentDesc(value)
+        }
+        if(name === "document_type"){
+            setDocumentType(value)
+        }
+        if(name === "documentWeight"){
+            setDocumentWeight(value)
+        }
+    }
+
+    const handleItemChange=(e)=>{
+        const {name, value} = e.target;
+        if(name === "new_item_profile"){
+            if(e.target.checked)
+                setItem({...item, new_item_profile:"1"})
+            else
+                setItem({...item, new_item_profile:"0"})
+        }
+        else{
+            setItem({...item, [name]:value})
+        }      
+    }
+
+    const handleEditMadeChange =(e) =>{
+        setCountrySelections(e)
+        if(e.length > 0){
+                countries.forEach((data)=>{
+                    if(data.name === e[0].name){
+                        editItem["made_in"] = data.alpha_code
+                    }
+                })
+            }
+    }
+
+    const handleItemDelete=(id)=>{
+        var totalqty=0, totalweight=0, totalcustoms=0
+        const newdata = [...data]
+        const indexdata = data.findIndex((data)=> data.id === id)
+        newdata.splice(indexdata, 1)
+        setData(newdata)
+
+        newdata.forEach(element => {
+            totalqty += parseFloat(element.qty);
+            totalweight += parseFloat(element.weight);
+            totalcustoms += parseFloat(element.customs_value);
+          });
+        setItemTotals({ 
+        totalQty:totalqty,
+        totalWeight:totalweight,
+        totalCustoms:totalcustoms,})
+    }
+
     const handlePackageChange=(e)=>{
         // packages.forEach((data)=>{
         //     if(data.id === e.target.value){
@@ -422,7 +534,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         //         setMaxLength(data.max_length === "0.00" && (e.target.value === "2" || e.target.value === "1") ? "" : data.max_length)
         //         setMaxWidth(data.max_width === "0.00" && (e.target.value === "2" || e.target.value === "1") ? "" : data.max_width)
         //         setMaxHeight(data.max_height === "0.00" && (e.target.value === "2" || e.target.value === "1") ? "" : data.max_height)
-        //         setUpperDetails({...upperDetails, packaging_type:e.target.value })
+                 setUpperDetails({...upperDetails, packaging_type:e.target.value })
         //         setPackageDetails({...packageDetails, length:data.max_length, width:data.max_width, height:data.max_height })
         //     }
             if(e.target.value === "1")
@@ -453,6 +565,72 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         //setRecipient({...recipient, ship_date:new Date()})
         setSearchInput("")
         setSingleSelectionsRecipient([])
+    }
+
+    const handleClearItem=()=>{
+        Object.keys(item).forEach(key => {
+            item[key] = "";
+        });
+        setItem({...item, unit: "PCS", new_item_profile:"0"})
+        setSearchInput("")
+    }
+
+    const handleSaveItem=(e)=>{
+        setIndex(index+1)
+        var totalqty=0, totalweight=0, totalcustoms=0
+        var newdata
+        if(e.target.value === "add_item"){
+            item["id"] = index+1
+                if(item.new_item_profile === "" || item.new_item_profile === undefined){
+                    setItem({new_item_profile:"0"})    
+                }
+                setData([...data, item]);
+                newdata = [...data, item]
+                setItem({unit:"PCS", new_item_profile:"0", hs_code:""})
+                setItemModal(false);
+                setCountrySelections([])
+            // if(validateItemDetails(item, setIsItemError)) {
+            //     item["id"] = index+1
+            //     if(item.new_item_profile === "" || item.new_item_profile === undefined){
+            //         setItem({new_item_profile:"0"})    
+            //     }
+            //     setData([...data, item]);
+            //     newdata = [...data, item]
+            //     setItem({unit:"PCS", new_item_profile:"0", hs_code:""})
+            //     setItemModal(false);
+            //     setCountrySelections([])
+            // }
+           
+        }
+        if(e.target.value === "edit_item"){
+            if(validateItemDetails(editItem, setIsItemError)) {
+                newdata = [...data]
+                const indexdata = data.findIndex((data)=> data.id === itemID)
+                newdata[indexdata].id = editItem.id
+                newdata[indexdata].description = editItem.description
+                newdata[indexdata].hs_code = editItem.hs_code?editItem.hs_code:""
+                newdata[indexdata].made_in = editItem.made_in
+                newdata[indexdata].qty = editItem.qty
+                newdata[indexdata].unit = editItem.unit
+                newdata[indexdata].weight = editItem.weight 
+                newdata[indexdata].customs_value = editItem.customs_value 
+                newdata[indexdata].new_item_profile = editItem.new_item_profile 
+                setData(newdata)
+                setEditItemModal(false);
+                setIsEditing(false)
+                setCountrySelections([])
+            }
+        }
+        
+        newdata.forEach(element => {
+            totalqty += parseFloat(element.qty);
+            totalweight += parseFloat(element.weight);
+            totalcustoms += parseFloat(element.customs_value);
+          });
+        setItemTotals({ 
+        totalQty:totalqty,
+        totalWeight:totalweight,
+        totalCustoms:totalcustoms,})
     }
 
     const handleSubmit=(e)=>{
@@ -841,9 +1019,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         onChange={handlePackageChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
-                                        <option value="1">Custom</option>
-                                        <option value="2">Letter</option>
-                                        <option value="3">box</option>
+                                        <option value="custom">Custom</option>
+                                        <option value="letter">Letter</option>
+                                        <option value="box">box</option>
 
                                     </select>
                                 </div>
@@ -896,18 +1074,18 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <>
                             <div className="col-4">
                                 <div className="form-group border-grey">
-                                    <p className='input-subtitle'>Type of Document<span className='required-icon'>*</span></p>
+                                    <p className='input-subtitle'>Package Type<span className='required-icon'>*</span></p>
                                     {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
                                     <select
                                         className="filter-dropdown form-control bg-grey"
-                                        name="invoice"
+                                        name="packageType"
+                                        value={upperDetails.packaging_type} 
+                                        onChange={handlePackageChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
-                                        <option defaultValue>Select</option>
-                                        <option value="Personal">Personal (e.g. letter)</option>
-                                        <option value="Interoffice">Interoffice (e.g. memo)</option>
-                                        <option value="Business">Business (e.g. contract)</option>
-                                        <option value="Others">Others</option>
+                                        <option value="custom">Custom</option>
+                                        <option value="letter">Letter</option>
+                                        <option value="box">box</option>
 
                                     </select>
                                 </div>
@@ -957,27 +1135,68 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             </div>
                         </>}
                         
-                        {isDocument &&
-                        <>
-                            <div className="col-4 left mt-3">
-                                <div className="form-group">
-                                    <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability" checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange}/>
-                                    {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
-                                    {/* <p className='input'>Dimensions</p> */}
-                                    <label className="custom-control-label input-subtitle pad-left5" htmlFor="purchase-limit">Purchase a higher limit of liability from FedEx</label>
-                                </div>
-                            </div>
-                            <div className="col-4 left mt-3">
-                                <div className="form-group text-align-left left">
-                                    <input type="checkbox" className="custom-control-inpu mr-10 text-align-left" id="signature-req" name="signature_required" checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange}/>
-                                    {/* checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange} */}
-                                    <label className="custom-control-label input-subtitle text-align-left pad-left5" htmlFor="signature-req">Require Signature</label>
-                                </div>
-                            </div>
-                        </>}
-
-                        
                     </div>
+
+                    {isDocument &&
+                        <>
+                            <div className="row mb-4 mt-3">
+                                <div className="col-4">
+                                    <div className="form-group border-grey">
+                                        <p className='input-subtitle'>Type of Document<span className='required-icon'>*</span></p>
+                                        {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
+                                        <select
+                                            className="filter-dropdown form-control bg-grey"
+                                            name="document_type"
+                                            value={documentType} 
+                                            onChange={handleDocumentChange}
+                                            //onChange={(e) => handleFilterChange(e)}
+                                            >
+                                            <option defaultValue>Select</option>
+                                            <option value="Personal">Personal (e.g. letter)</option>
+                                            <option value="Interoffice">Interoffice (e.g. memo)</option>
+                                            <option value="Business">Business (e.g. contract)</option>
+                                            <option value="Others">Others</option>
+
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-4 ">
+                                    <div className="form-group border-grey">
+                                        <p className='input-subtitle'>Document Description<span className='required-icon'>*</span></p>
+                                        <input type="text" className="form-control bg-grey" aria-label="max-weight" name="description" value={documentDesc} onChange={handleDocumentChange}/>
+                                        <InputError isValid={isError.documentDesc} message={'Document description is required*'}/>
+                                    </div>
+                                </div>
+                                <div className="col-4 ">
+                                    <div className="form-group border-grey">
+                                        <p className='input-subtitle'>Customs Value<span className='required-icon'>*</span></p>
+                                        <input type="number" className="form-control bg-grey" aria-label="max-weight" name="customs_value"  value={documentCustoms} onChange={handleDocumentChange}/>
+                                        <InputError isValid={isError.documentCustoms} message={'Customs value is required*'}/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="row mb-4 mt-3">
+                                <div className="col-4 left mt-3">
+                                    <div className="form-group">
+                                        <input type="checkbox" className="custom-control-inpu mr-10 " id="purchase-limit" name="higher_limit_liability" checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange}/>
+                                        {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
+                                        {/* <p className='input'>Dimensions</p> */}
+                                        <label className="custom-control-label input-subtitle pad-left5" htmlFor="purchase-limit">Purchase a higher limit of liability from FedEx</label>
+                                    </div>
+                                </div>
+                                <div className="col-4 left mt-3">
+                                    <div className="form-group text-align-left left">
+                                        <input type="checkbox" className="custom-control-inpu mr-10 text-align-left" id="signature-req" name="signature_required" checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange}/>
+                                        {/* checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange} */}
+                                        <label className="custom-control-label input-subtitle text-align-left pad-left5" htmlFor="signature-req">Require Signature</label>
+                                    </div>
+                                </div>
+                                <div className="col-4 left mt-3">
+                                </div>
+                            </div>
+                            
+                        </>}
 
                     <hr></hr>
                 {/* package details div */}
@@ -1008,7 +1227,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {tabledata?.map((row, index) => (
+                                    {data?.map((row, index) => (
                                     <tr key={index}
                                     >
                                         <td align="left" className='input-subtitle'>{row.description}</td>
@@ -1019,10 +1238,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <td align="center" className='input-subtitle'>{row.weight}</td>
                                         <td align="center" className='input-subtitle'>{row.customs_value}</td>
                                         <td align="center" style={{display:"flex", justifyContent:"space-around"}}>
-                                            <img src={editicon} className="tb-icons" onClick={()=>handleItemEdit(row.id)}/>
-                                            {/* name={row.hs_code}  onClick={()=>handleItemEdit(row.id)} */}
-                                            <img src={deleteicon} className="tb-icons" onClick={() => console.log("del")}/>
-                                            {/* onClick={()=>handleItemDelete(row.id)} */}
+                                            <img src={editicon} className="tb-icons" name={row.hs_code} onClick={()=>handleItemEdit(row.id)}/>
+                                            <img src={deleteicon} className="tb-icons" name={row.hs_code} onClick={()=>handleItemDelete(row.id)}/>
                                         </td>
                                     </tr>
                                     ))}
@@ -1030,10 +1247,10 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 <tfoot className="item-table-headers">
                                     <tr style={{backgroundColor:"#EFEFEF"}}>
                                         <td colspan="3" align="right" className='input-subtitle blue-txt'>TOTAL:</td>
-                                        <td align="center" className='input-subtitle blue-txt'>11</td>
+                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalQty}</td>
                                         <td align="right" className='input-subtitle blue-txt'>-</td>  
-                                        <td align="center" className='input-subtitle blue-txt'>6</td>  
-                                        <td align="center" className='input-subtitle blue-txt'>201</td>  
+                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalWeight}</td>  
+                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalCustoms}</td>  
                                         <td align="right" className='input-subtitle blue-txt'>-</td>  
                                     </tr>
                                 </tfoot>
@@ -1131,7 +1348,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="text" className="form-control" aria-label="description" name="description"/>
+                                        <input type="text" className="form-control" aria-label="description" name="description" value={item.description} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.description} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
                                     {/* <InputError isValid={isItemError.description} message={'Description is required*'}/> */}
@@ -1147,7 +1364,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="text" className="form-control" aria-label="hs_code" name="hs_code"/>
+                                        <input type="text" className="form-control" aria-label="hs_code" name="hs_code" value={item.hs_code} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.hs_code} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
                                     {/* <InputError isValid={isItemError.hs_code} message={'HS Code is required*'}/> */}
@@ -1162,25 +1379,15 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             </div>
                             <div className="col">
                                 <div className="form-group">
-                                    <div className="input-group">`
-                                        <select
-                                            className="filter-dropdown form-control"
-                                            name="country"
-                                            //onChange={(e) => handleFilterChange(e)}
-                                            >
-                                            <option value="">Country</option>
-                                            <option value="for approval">Sample 1</option>
-                                            <option value="active">Sample 2</option>
-                                            <option value="suspended">Sample 3</option>
-                                        </select>
-                                    {/* <Typeahead
+                                    <div className="input-group">
+                                    <Typeahead
                                         id="basic-typeahead-single"
                                         labelKey="name"
-                                        //onChange={handleMadeChange}
-                                        //options={countries}
+                                        onChange={handleMadeChange}
+                                        options={countries}
                                         placeholder="Enter a country"
-                                        //selected={countrySelections}
-                                    /> */}
+                                        selected={countrySelections}
+                                    />
                                     {/* <Form.Select size="md" name="made_in" value={item.made_in} onChange={handleItemChange}>
                                         <option defaultValue>Select</option>
                                         {countries.map((data) => {return(<option class="color-black" key={data.id} value={data.alpha_code}>{data.name}</option>)})}
@@ -1198,10 +1405,10 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="weight" name="weight"/>
+                                        <input type="number" className="form-control" aria-label="weight" name="weight" value={item.weight} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.weight} onChange={(e)=>handleItemChange(e)} */}
                                         <div className="input-group-append">
-                                        <span className="input-group-text bg-white">kg</span>
+                                            <span className="input-group-text bg-white">kg</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1217,7 +1424,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="qty" name="qty"/>
+                                        <input type="number" className="form-control" aria-label="qty" name="qty" value={item.qty} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.qty} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
                                 </div>
@@ -1231,8 +1438,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                    <Form.Select size="md" name="unit" >
-                                    {/* value={item.unit} onChange={handleItemChange} */}
+                                    <Form.Select size="md" name="unit" value={item.unit} onChange={handleItemChange}>
                                         <option value="PCS">PIECES</option>
                                         {units.map((data) => {return(<option class="color-black" key={data.id} value={data.key}>{data.name}</option>)})}
                                     </Form.Select>
@@ -1250,8 +1456,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="customs_value" name="customs_value"/>
-                                        {/* value={item.customs_value} onChange={(e)=>handleItemChange(e)} */}
+                                        <input type="number" className="form-control" aria-label="customs_value" name="customs_value" value={item.customs_value} onChange={(e)=>handleItemChange(e)}/>
                                     </div>
                                 </div>
                                 {/* <InputError isValid={isItemError.customs_value} message={'Customs value is required*'}/> */}
@@ -1260,8 +1465,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row">
                             <div className="col-6">
                                 <div className="form-group">
-                                    <input type="checkbox" className="custom-control-inpu mr-10" id="new_item_profile" name="new_item_profile"/>
-                                    {/* onChange={(e)=>handleItemChange(e)} */}
+                                    <input type="checkbox" className="custom-control-inpu mr-10" id="new_item_profile" name="new_item_profile" checked={item.new_item_profile === "1"? true:false} onChange={(e)=>handleItemChange(e)}/>
                                     <label className="custom-control-label pad-left5" htmlFor="new_item_profile">Save as new item profile</label>
                                 </div>
                             </div>
@@ -1269,12 +1473,10 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                     </Modal.Body>
                     <Modal.Footer className='fw-bold'>
                         <div className="col-3">
-                            <button className="btn-clear btn-rad"> Clear All </button>
-                            {/* onClick={handleClear} */}
+                            <button className="btn-clear btn-rad" onClick={handleClearItem}> Clear All </button>
                         </div>
                         <div className="col-3">
-                            <button type="submit" className="btn-blue btn-rad" value="add_item"> Add Item </button>
-                            {/* onClick={handleSaveItem}  */}
+                            <button type="submit" className="btn-blue btn-rad" value="add_item" onClick={handleSaveItem} > Add Item </button>
                         </div>
                     </Modal.Footer>
                 </Modal>
@@ -1329,7 +1531,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="text" className="form-control" aria-label="description" name="description"/>
+                                        <input type="text" className="form-control" aria-label="description" name="description" value={editItem.description} onChange={(e)=>handleEditItemChange(e)}/>
                                         {/* value={editItem.description} onChange={(e)=>handleEditItemChange(e)} */}
                                     </div>
                                     {/* <InputError isValid={isItemError.description} message={'Description is required*'}/> */}
@@ -1345,7 +1547,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="text" className="form-control" aria-label="hs_code" name="hs_code"/>
+                                        <input type="text" className="form-control" aria-label="hs_code" name="hs_code" value={editItem.hs_code} onChange={handleEditItemChange} />
                                         {/* value={editItem.hs_code} onChange={handleEditItemChange} */}
                                     </div>
                                     {/* <InputError isValid={isItemError.hs_code} message={'HS Code is required*'}/> */}
@@ -1361,28 +1563,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <select
-                                            className="filter-dropdown form-control"
-                                            name="country"
-                                            //onChange={(e) => handleFilterChange(e)}
-                                            >
-                                            <option value="">Country</option>
-                                            <option value="for approval">Sample 1</option>
-                                            <option value="active">Sample 2</option>
-                                            <option value="suspended">Sample 3</option>
-                                        </select>
-                                    {/* <Typeahead
+                                    <Typeahead
                                         id="basic-typeahead-single"
                                         labelKey="name"
                                         onChange={handleEditMadeChange}
                                         options={countries}
                                         placeholder="Enter a country"
                                         selected={countrySelections}
-                                    /> */}
-                                    {/* <Form.Select size="md" name="made_in" value={editItem.made_in} onChange={handleEditItemChange}>
-                                        <option defaultValue>Select</option>
-                                        {countries.map((data) => {return(<option class="color-black" key={data.id} value={data.alpha_code}>{data.name}</option>)})}
-                                    </Form.Select> */}
+                                    />
                                     </div>
                                 </div>
                                 {/* <InputError isValid={isItemError.made_in} message={'Made in is required*'}/> */}
@@ -1395,8 +1583,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="weight" name="weight" />
-                                        {/* value={editItem.weight} onChange={(e)=>handleEditItemChange(e)} */}
+                                        <input type="number" className="form-control" aria-label="weight" name="weight" value={editItem.weight} onChange={(e)=>handleEditItemChange(e)} />
                                         <div className="input-group-append">
                                         <span className="input-group-text bg-white">kg</span>
                                         </div>
@@ -1414,8 +1601,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="qty" name="qty"/>
-                                        {/* value={editItem.qty} onChange={(e)=>handleEditItemChange(e)} */}
+                                        <input type="number" className="form-control" aria-label="qty" name="qty" value={editItem.qty} onChange={(e)=>handleEditItemChange(e)} />
                                     </div>
                                 </div>
                                 {/* <InputError isValid={isItemError.qty} message={'Qty is required*'}/> */}
@@ -1428,8 +1614,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                    <Form.Select size="md" name="unit">
-                                    {/* value={editItem.unit} onChange={handleEditItemChange} */}
+                                    <Form.Select size="md" name="unit" value={editItem.unit} onChange={handleEditItemChange} >
                                         <option value="PCS">PIECES</option>
                                         {units.map((data) => {return(<option class="color-black" key={data.key} value={data.key}>{data.name}</option>)})}
                                     </Form.Select>
@@ -1447,8 +1632,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">   
-                                        <input type="number" className="form-control" aria-label="customs_value" name="customs_value" />
-                                        {/* value={editItem.customs_value} onChange={(e)=>handleEditItemChange(e)} */}
+                                        <input type="number" className="form-control" aria-label="customs_value" name="customs_value" value={editItem.customs_value} onChange={(e)=>handleEditItemChange(e)} />
                                     </div>
                                 </div>
                                 {/* <InputError isValid={isItemError.customs_value} message={'Customs value is required*'}/> */}
@@ -1457,8 +1641,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row">
                             <div className="col-6">
                                 <div className="form-group">
-                                    <input type="checkbox" className="custom-control-inpu mr-10" id="new_item_profile_edit" name="new_item_profile" />
-                                    {/* checked={editItem.new_item_profile === "1"? true:false} onChange={(e)=>handleEditItemChange(e)} */}
+                                    <input type="checkbox" className="custom-control-inpu mr-10" id="new_item_profile_edit" name="new_item_profile" checked={editItem.new_item_profile === "1"? true:false} onChange={(e)=>handleEditItemChange(e)} />
                                     <label className="custom-control-label pad-left5" htmlFor="new_item_profile_edit"> Save as new item profile </label>
                                 </div>
                             </div>
@@ -1469,8 +1652,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <button className="btn-pink btn-rad" onClick={()=>setIsEditing(false)}> Cancel </button>
                         </div>
                         <div className="col-3">
-                            <button type="submit" className="btn-blue btn-rad" > Save </button>
-                            {/* onClick={handleSaveItem} value="edit_item" */}
+                            <button type="submit" className="btn-blue btn-rad" onClick={handleSaveItem} value="edit_item" > Save </button>
                         </div>
                     </Modal.Footer>
                 </Modal> 

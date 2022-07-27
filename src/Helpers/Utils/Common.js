@@ -39,3 +39,8 @@ import moment from "moment";
   
     return stringDate[1] + " " + stringDate[2] + ", " + stringDate[3];
 ;}
+
+export const formatYMD = (date) => {
+  var format = "yyyy:mm:dd";
+  return moment(date).format("YYYY-MM-DD");
+};

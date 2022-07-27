@@ -8,8 +8,14 @@ import { Navigate } from 'react-router-dom';
 import "./Confirmation.css";
 import delivery from "../../Assets/Images/Form/delivery.png"
 
-function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDetails, transactionDetails, isDocument, 
-                setIsDocument, navigation}) 
+function Summary({sender, setSender, recipient, setRecipient, provinceSelections, setProvinceSelections, isItem, setIsItem, isDocument, 
+                    setIsDocument, upperDetails, setUpperDetails, sendDetails, setSendDetails, navigation, index, item, setItem, setIndex,
+                    singleSelectionsSender, setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient,
+                    packageDetails, setPackageDetails, data, setData, maxWeight, maxLength, setMaxLength, setMaxWeight, maxWidth, setMaxWidth, 
+                    maxHeight, setMaxHeight, documentCustoms, setDocumentCustoms, documentDesc, setDocumentDesc, documentType, setDocumentType, 
+                    documentWeight, setDocumentWeight, loadingPackage, setLoadingPackage, 
+                    searchingItem, setSearchingItem, setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections,
+                    addActualWeight, setAddActualWeight, itemTotals, setItemTotals,}) 
 {
     const [agree ,setAgree] = useState(true);
     const [redirect, setRedirect] = useState("");
@@ -30,7 +36,7 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
         // {label: 'Actions', key: 'actions'},
     ];
 
-    const data = [
+    const tabledata = [
         {description: 'Clothes', hs_code: '111', made_in: 'Ph', qty: '1', unit: '2', weight: '1kg', customs_value: '101', },
         {description: 'Textboks', hs_code: '112', made_in: 'Ph', qty: '10', unit: '3', weight: '5kg', customs_value: '100', },
     ];
@@ -48,7 +54,7 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
         setIsDocument(true);
     }
 
-    console.log(sender)
+    console.log(documentType)
 
     return (
         <div style={{display:"flex", flexDirection:"row"}}>
@@ -362,7 +368,7 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
                                 </div>
                                 <div className="col-sm-6 left">
                                     <span className="text span-summary">
-                                        {upperDetails.packing_type}
+                                        {upperDetails.packaging_type}
                                     </span>
                                 </div>
                             </div>
@@ -434,7 +440,7 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
                                     </div>
                                     <div className="col-sm-6 left">
                                         <span className="text span-summary">
-                                            {/* {upperDetails.service_type} */}
+                                            {documentType}
                                         </span>
                                     </div>
                                 </div>
@@ -445,7 +451,7 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
                                     </div>
                                     <div className="col-sm-6 left">
                                         <span className="text span-summary">
-                                            {} 
+                                            {documentDesc} 
                                         </span>
                                     </div>
                                 </div>
@@ -455,7 +461,7 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
                                     </div>
                                     <div className="col-sm-6 left">
                                         <span className="text span-summary">
-                                            {} 
+                                            {documentCustoms} 
                                         </span>
                                     </div>
                                 </div>
@@ -580,10 +586,10 @@ function Summary({isItem, setIsItem, sender, recipient, upperDetails, packageDet
                                 <tfoot className="item-table-headers">
                                     <tr style={{backgroundColor:"#EFEFEF"}}>
                                         <td colspan="3" align="right" className='input-subtitle blue-txt'>TOTAL:</td>
-                                        <td align="center" className='input-subtitle blue-txt'>11</td>
+                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalQty}</td>
                                         <td align="right" className='input-subtitle blue-txt'>-</td>  
-                                        <td align="center" className='input-subtitle blue-txt'>6</td>  
-                                        <td align="center" className='input-subtitle blue-txt'>201</td>  
+                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalWeight}</td>  
+                                        <td align="center" className='input-subtitle blue-txt'>{itemTotals.totalCustoms}</td>  
                                     </tr>
                                 </tfoot>
                             </table>
