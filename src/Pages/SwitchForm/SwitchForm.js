@@ -58,6 +58,8 @@ const steps = [
     {id: "summary"},
 ]
 
+    const [captcha ,setCaptcha] = useState(false)
+
     //sender
     const [sender, setSender] = useState(senderDetails);
     const [hasResult, setHasResult] = useState(false);
@@ -161,7 +163,7 @@ const steps = [
                                 documentWeight, setDocumentWeight, isItem, setIsItem, isDocument, setIsDocument, loadingPackage, setLoadingPackage, searchingItem, 
                                 setSearchingItem, setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections, addActualWeight, 
                                 setAddActualWeight, itemTotals, setItemTotals, type, generalDetails, transactionDetails, upperDetails, packageDetails, singleSelectionsSender, 
-                                setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient}
+                                setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient, captcha ,setCaptcha}
 
     const summaryProps = {sender, setSender, hasResult, setHasResult, result, setResult, searchingSender, setSearchingSender, provinceSelections, 
                             setProvinceSelections, navigation, recipient, setRecipient, postalAware, setPostalAware, 
@@ -172,7 +174,7 @@ const steps = [
                             documentWeight, setDocumentWeight, isItem, setIsItem, isDocument, setIsDocument, loadingPackage, setLoadingPackage, searchingItem, 
                             setSearchingItem, setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections, addActualWeight, 
                             setAddActualWeight, itemTotals, setItemTotals, type, generalDetails, transactionDetails, upperDetails, packageDetails, singleSelectionsSender, 
-                            setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient}
+                            setSingleSelectionsSender, singleSelectionsRecipient, setSingleSelectionsRecipient, captcha ,setCaptcha}
 
     switch (step.id) {
         // case "sender":

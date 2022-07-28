@@ -29,7 +29,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             maxHeight, setMaxHeight, documentCustoms, setDocumentCustoms, documentDesc, setDocumentDesc, documentType, setDocumentType, 
                             documentWeight, setDocumentWeight, loadingPackage, setLoadingPackage, 
                             searchingItem, setSearchingItem, setTransactionDetails, setGeneralDetails, setType, countrySelections, setCountrySelections,
-                            addActualWeight, setAddActualWeight, itemTotals, setItemTotals,}) {
+                            addActualWeight, setAddActualWeight, itemTotals, setItemTotals, captcha, setCaptcha}) {
 
     //item table headers
     const headers = [
@@ -91,7 +91,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     const [editItem, setEditItem] = useState({});
     const [itemID, setItemID] = useState(0);
     const [agree ,setAgree] = useState(true)
-    const [captcha ,setCaptcha] = useState(false)
+    //const [captcha ,setCaptcha] = useState(false)
     const captchaRef = useRef()
     const [token , setToken] = useState("");
     
@@ -185,6 +185,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         // console.log(documentType)
         console.log(token)
         console.log(captchaRef)
+        console.log(agree&&captcha)
+       // console.log(captchaRef)
 
 
 
@@ -393,6 +395,10 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         }
         // setSendDetails({})
     }
+
+    // const updateRecaptcha = ()=>{
+    //     setToken("")
+    // }
 
     const handleCountryChangeSender=(e)=>{
         setSingleSelectionsSender(e)
@@ -666,18 +672,23 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
     const handleSubmit=(e)=>{
         e.preventDefault()
-        setToken(captchaRef.current);
-        console.log(token)
-        captchaRef.current.reset();
+        if (captchaRef.current) {
+            if (captchaRef.current.props.grecaptcha.getResponse().length !== 0) { 
+                setToken(captchaRef.current);
+                setCaptcha(true)
+                console.log(token)
+                captchaRef.current.reset();
+            }
+        }
+        
         //console.log(sender)
         if(sender.sender_firstname !== "" || sender.sender_company !== "")
         {
             if(recipient.recipient_firstname !== "" || recipient.recipient_company !== "") {
                 if(validateSender(sender, recipient, singleSelectionsSender, singleSelectionsRecipient , setIsError)){
-                    console.log(validatePackage(upperDetails, documentCustoms, documentDesc, documentType, documentWeight, maxWeight, data, setIsPackageError))
                     if(validatePackage(upperDetails, documentCustoms, documentDesc, documentType, documentWeight, maxWeight, data, setIsPackageError))
                     {
-                        if(agree && token) 
+                        if(agree && captcha) 
                         {
                             toast.success("REDIRECTING TO CONFIRMATION...", { autoClose: 2000, hideProgressBar: true })
                             setTimeout(()=>{
@@ -1075,7 +1086,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         <div className="input-group-prepend">
                                             <span className="input-group-text input-subtitle" id="basic-addon1" name="country_code">+63</span>
                                         </div>
-                                            <input type="number" className="form-control" aria-label="contact" aria-describedby="basic-addon1" name="recipient_contact_no" required onChange={(e)=>handleChange(e)} value={recipient.recipient_contact_no} />
+                                            <input type="number" className="form-control input-subtitle" aria-label="contact" aria-describedby="basic-addon1" name="recipient_contact_no" required onChange={(e)=>handleChange(e)} value={recipient.recipient_contact_no} />
                                             {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_contact_no}  */}
                                         </div>
                                         <InputError isValid={isError.recipient_contact_no} message={'Contact no. is required*'}/>
@@ -1409,6 +1420,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 className='center'
                                 sitekey="6Lc4EiQhAAAAAOgVr1rGx6VUoM9z5fNk0zyPgnzY"
                                 ref={captchaRef}
+                                onChange={()=>setCaptcha(true)}
                                 //data-callback="recaptchaCallback"
                                 // onClick={recaptchaCallback}
                             />

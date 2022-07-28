@@ -4,6 +4,10 @@ import moment from "moment";
  * Common Utilities
  ***************************/
 
+ export const refreshPage = () => {
+  window.location.reload();
+};
+
  export const getTodayDate = () => {
     return new Date();
   };
