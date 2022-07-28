@@ -40,12 +40,20 @@ header {
     display: none;
 }
 
+.mt-2 {
+    margin-top: 2%;
+}
+
 .mt-3 {
     margin-top: 3%;
 }
 
 .mt-5 {
     margin-top: 5%;
+}
+
+.ml-5 {
+    margin-left: 5px;
 }
 
 .mr-5 {
@@ -243,7 +251,7 @@ header {
     .container {
         max-width: 230vw;
         margin: 5px;
-        margin-left: -1vw;
+        margin-left: 0px;
         /* margin-left: 13px; */
     }
 
@@ -257,6 +265,10 @@ header {
     }
 
     .form-control {
+        font-size: 10px;
+    }
+
+    .type {
         font-size: 10px;
     }
 
@@ -284,12 +296,17 @@ header {
 
 @media screen and (max-width: 415px) {
     .container {
-        margin-left: 3vw;
+        margin-left: 0px;
     }
 
     .form-control {
         font-size: 10px;
-       
+        width: 100%;
+    }
+
+    .type {
+        font-size: 10px;
+        width: 100%;
     }
 
     .search-icon {
@@ -307,7 +324,7 @@ header {
     }
 
     .col-3 {
-        width: 40%;
+        width: 50%;
         margin-bottom: 10px;
     }
     
@@ -322,7 +339,17 @@ header {
 
     .btn-clear {
         width: 20vw !important;
-        /* margin-left: -25px; */
+        margin-left: -40px;
+    }
+
+    .btn-blue {
+        width: 20vw !important;
+        margin-left: -40px;
+    }
+
+    .btn-pink {
+        width: 20vw !important;
+        margin-left: -40px;
     }
 
     .btn-next {

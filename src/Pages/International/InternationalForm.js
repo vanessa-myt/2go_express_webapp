@@ -1,4 +1,4 @@
-import React, {useEffect, useState}  from 'react'
+import React, {useEffect, useState, useRef }  from 'react'
 import {Form, Modal, Button} from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -12,7 +12,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import Moment from "moment";
 import ReactLoading from 'react-loading';
 import ReCAPTCHA from "react-google-recaptcha"
-
 
 //assets
 import Navbar from '../../Components/Navbar/Navbar';
@@ -86,8 +85,6 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     const [itemModal, setItemModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editItemModal, setEditItemModal] = useState(false);
-    // const [isItem, setIsItem] = useState(true);
-    // const [isDocument, setIsDocument] = useState(false);
     const [redirect, setRedirect] = useState("");
     const [shipdate, setShipDate] = useState("");
     const [isCustomPackaging, setIsCustomPackaging] = useState(false);
@@ -95,7 +92,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     const [itemID, setItemID] = useState(0);
     const [agree ,setAgree] = useState(true)
     const [captcha ,setCaptcha] = useState(false)
-
+    const captchaRef = useRef()
+    const [token , setToken] = useState("");
     
     let packageNumber = 1;
     let item_weights = 0
@@ -180,11 +178,13 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         // console.log(recipient)
         // console.log(packageDetails)
         // console.log(upperDetails)
-        console.log(item)
-        console.log(recipient.ship_date)
+        //console.log(item)
+        //console.log(recipient.ship_date)
         // console.log(documentCustoms)
         // console.log(documentDesc)
         // console.log(documentType)
+        console.log(token)
+        console.log(captchaRef)
 
 
 
@@ -592,9 +592,20 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         }
       }
 
-      function recaptchaCallback(){
-          setCaptcha(true)
-      }
+
+
+    //   function recaptchaCallback(){
+    //     if (grecaptcha.getResponse() == ""){
+    //         setCaptcha(false)
+    //         // alert("You can't proceed!");
+    //     } else {
+    //         setCaptcha(true)
+    //         // alert("Thank you");
+    //     }
+          
+    //   }
+
+      
       
     //   function isCaptchaChecked() {
     //     return grecaptcha && grecaptcha.getResponse().length !== 0;
@@ -602,7 +613,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
 
 
-      console.log(captcha)
+    //console.log(captcha)
 
     const handleSaveItem=(e)=>{
         setIndex(index+1)
@@ -655,7 +666,10 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
     const handleSubmit=(e)=>{
         e.preventDefault()
-        console.log(sender)
+        setToken(captchaRef.current);
+        console.log(token)
+        captchaRef.current.reset();
+        //console.log(sender)
         if(sender.sender_firstname !== "" || sender.sender_company !== "")
         {
             if(recipient.recipient_firstname !== "" || recipient.recipient_company !== "") {
@@ -663,13 +677,12 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                     console.log(validatePackage(upperDetails, documentCustoms, documentDesc, documentType, documentWeight, maxWeight, data, setIsPackageError))
                     if(validatePackage(upperDetails, documentCustoms, documentDesc, documentType, documentWeight, maxWeight, data, setIsPackageError))
                     {
-                        if(agree) 
+                        if(agree && token) 
                         {
                             toast.success("REDIRECTING TO CONFIRMATION...", { autoClose: 2000, hideProgressBar: true })
                             setTimeout(()=>{
                                 navigation.next()    
                             }, 2000)
-                            console.log("pisti")
                             if(upperDetails["detail_type"]==="item"){
                                 data.forEach(data => {
                                     for (let key in data) {
@@ -723,7 +736,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             }
                         }
                         else {
-                            toast.error("PLEASE CHECK CAPTCHA AND AGREE TO THE TERMS AND CONDITIONS",{ autoClose: 4000, hideProgressBar: true })
+                            toast.error("PLEASE CHECK CAPTCHA AND AGREE TO THE TERMS AND CONDITIONS",{ autoClose: 2000, hideProgressBar: true })
                         }
                     }
                     else{
@@ -732,13 +745,12 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                 } 
             }
             else{
-                toast.error("PLEASE PROVIDE RECIPIENT COMPANY OR NAME",{ autoClose: 4000, hideProgressBar: true });
-                console.log("yawa2")
+                toast.error("PLEASE PROVIDE RECIPIENT COMPANY OR NAME",{ autoClose: 2000, hideProgressBar: true });
             }
         }
         else{
-            toast.error("PLEASE PROVIDE SENDER COMPANY OR NAME",{ autoClose: 4000, hideProgressBar: true });
-            console.log("yawa2")
+            toast.error("PLEASE PROVIDE SENDER COMPANY OR NAME",{ autoClose: 2000, hideProgressBar: true });
+           
             
         }
        
@@ -802,9 +814,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     return (
     <div className='container'>
         <Navbar></Navbar>
-        <h1 className="row mb-4 text-center header title mt-5">PLACE BOOKING</h1>    
+        <h1 className="row mb-4 text-center header title mt-5 ml-5">PLACE BOOKING</h1>    
 
-        <div className="container form-cont ">
+        <div className="container form-cont">
             <ToastContainer/>
 
             {/* SENDER */}
@@ -814,7 +826,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-6">
                             <div className="form-group">
                                 <p className='input-subtitle'>Name</p>
-                                <input type="text" name="sender_firstname" className="form-control" id="sender_firstname" aria-describedby="sender_firstname" placeholder="e.g. Juan Dela Cruz Jr." onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_firstname}/>
+                                <input type="text" name="sender_firstname" className="form-control input-subtitle" id="sender_firstname" aria-describedby="sender_firstname" placeholder="e.g. Juan Dela Cruz Jr." onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_firstname}/>
                                 {/* <input type="text" name="sender_firstname" className="form-control" id="first-name" aria-describedby="first-name" placeholder="e.g. Jane" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_firstname}/> */}
                                 {/* <InputError isValid={isError.sender_firstname} message={'First name is required*'}/> */}
                             </div>
@@ -822,7 +834,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-6">
                             <div className="form-group">
                                 <p className='input-subtitle'>Company Name</p>
-                                <input type="text" name="sender_company" className="form-control" id="sender_company" aria-describedby="sender_company" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_company}/>
+                                <input type="text" name="sender_company" className="form-control input-subtitle" id="sender_company" aria-describedby="sender_company" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_company}/>
                                 {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_company} */}
                                 <InputError isValid={isError.sender_company_short} message={'Company Name must contain at least 3 characters.'}/>
                                 <InputError isValid={isError.sender_company_long} message={'Company Name must not exceed 35 characters.'}/>
@@ -835,6 +847,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 <p className='input-subtitle'>Country<span className='required-icon'>*</span></p>
                                 {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
                                 <Typeahead
+                                    className='input-subtitle'
                                     id="basic-typeahead-single"
                                     labelKey="name"
                                     onChange={handleCountryChangeSender}
@@ -858,20 +871,20 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             </div>
                         </div>
 
-                        <div className="col-2">
+                        <div className="col-3">
                             <div className="form-group">
                                 <p className='input-subtitle'>Postal Code<span className='required-icon'>*</span></p>
-                                <input type="text" name="sender_postal" className="form-control" id="sender_postal" aria-describedby="sender_postal" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_postal}/>
+                                <input type="text" name="sender_postal" className="form-control input-subtitle" id="sender_postal" aria-describedby="sender_postal" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_postal}/>
                                 {/* onChange={handlePostalChange} required value={sender.sender_postal} */}
                                 <InputError isValid={isError.sender_postal} message={'Postal Code is required*'}/>
                             </div>
                         </div>
                         
-                        <div className="col-4">
+                        <div className="col-3">
                         {/* <div className="col-6"> */}
                             <div className="form-group">
                                 <p className='input-subtitle'>State/Province<span className='required-icon'>*</span></p>
-                                <input type="text" name="sender_state_code" className="form-control" id="sender_state_code" aria-describedby="sender_state_code" required onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_state_code}/>
+                                <input type="text" name="sender_state_code" className="form-control input-subtitle" id="sender_state_code" aria-describedby="sender_state_code" required onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_state_code}/>
                                 {/* <Typeahead
                                     id="basic-typeahead-single"
                                     labelKey="name"
@@ -886,7 +899,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-3">
                             <div className="form-group">
                                 <p className='input-subtitle'>City<span className='required-icon'>*</span></p>
-                                <input type="text" name="sender_city" className="form-control" id="sender_city" aria-describedby="sender_city" required onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})}/>
+                                <input type="text" name="sender_city" className="form-control input-subtitle" id="sender_city" aria-describedby="sender_city" required onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})}/>
                                 {/* <Typeahead
                                     id="basic-typeahead-single"
                                     labelKey="name"
@@ -903,7 +916,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-4">
                             <div className="form-group">
                                 <p className='input-subtitle'>Address Line 1<span className='required-icon'>*</span></p>
-                                <input type="text" name="sender_address1" className="form-control" id="sender_address1" aria-describedby="sender_address1" placeholder="Unit Number/ Building/ Street Number/ Village/ Barangay" maxLength="35" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_address1}/>
+                                <input type="text" name="sender_address1" className="form-control input-subtitle" id="sender_address1" aria-describedby="sender_address1" placeholder="Unit Number/ Building/ Street Number/ Village/ Barangay" maxLength="35" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_address1}/>
                                 {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_address1} */}
                                 <InputError isValid={isError.sender_address1} message={'Address 1 is required*'}/>
                                 <InputError isValid={isError.sender_address_len} message={'Address 1 must contain at least 3 characters.'}/>
@@ -912,14 +925,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-4">
                             <div className="form-group">
                                 <p className='input-subtitle'>Address Line 2</p>
-                                <input type="text" className="form-control" id="sender_address2" aria-describedby="sender_address2" name="sender_address2" maxLength="35" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_address2}/>
+                                <input type="text" className="form-control input-subtitle" id="sender_address2" aria-describedby="sender_address2" name="sender_address2" maxLength="35" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_address2}/>
                                 {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_address2} */}
                             </div>
                         </div>
                         <div className="col-4">
                             <div className="form-group">
                                 <p className='input-subtitle'>Address Line 3</p>
-                                <input type="text" className="form-control" id="sender_address3" aria-describedby="sender_address3" name="sender_address3" maxLength="35" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_address3}/>
+                                <input type="text" className="form-control input-subtitle" id="sender_address3" aria-describedby="sender_address3" name="sender_address3" maxLength="35" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_address3}/>
                                 {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_address2} */}
                             </div>
                         </div>
@@ -932,7 +945,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     <div className="input-group-prepend">
                                     <span className="input-group-text input-subtitle" id="basic-addon1">+63</span>
                                     </div>
-                                        <input type="number" name="sender_contact_no" className="form-control" aria-label="contact" aria-describedby="basic-addon1" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_contact_no}/>
+                                        <input type="number" name="sender_contact_no" className="form-control input-subtitle" aria-label="contact" aria-describedby="basic-addon1" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_contact_no}/>
                                         {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_contact_no} */}
                                 </div>
                                 <InputError isValid={isError.sender_contact_no} message={'Contact no. is required*'}/>
@@ -941,7 +954,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-6">
                             <div className="form-group">
                                 <p className='input-subtitle'>Email Address</p>
-                                <input type="email" name="sender_email" className="form-control" id="email-add" aria-describedby="email-add" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_email}/>
+                                <input type="email" name="sender_email" className="form-control input-subtitle" id="email-add" aria-describedby="email-add" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_email}/>
                                 {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_email} */}
                             </div>
                         </div>
@@ -959,7 +972,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-6">
                             <div className="form-group">
                                 <p className='input-subtitle'>Name</p>
-                                <input type="text" className="form-control" id="recipient_firstname" aria-describedby="recipient_firstname" name="recipient_firstname" placeholder="e.g. John Smith Jr." required onChange={(e)=>handleChange(e)} value={recipient.recipient_firstname} />
+                                <input type="text" className="form-control input-subtitle" id="recipient_firstname" aria-describedby="recipient_firstname" name="recipient_firstname" placeholder="e.g. John Smith Jr." required onChange={(e)=>handleChange(e)} value={recipient.recipient_firstname} />
                                 {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_firstname}  */}
                                 {/* <InputError isValid={isError.recipient_firstname} message={'First name is required*'}/> */}
                             </div>
@@ -967,7 +980,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-6">
                             <div className="form-group">
                                 <p className='input-subtitle'>Company Name</p>
-                                <input type="text" className="form-control" id="recipient_company" aria-describedby="recipient_company" name="recipient_company" onChange={(e)=>handleChange(e)} value={recipient.recipient_company} />
+                                <input type="text" className="form-control input-subtitle" id="recipient_company" aria-describedby="recipient_company" name="recipient_company" onChange={(e)=>handleChange(e)} value={recipient.recipient_company} />
                                 {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_company} */}
                                 <InputError isValid={isError.recipient_company_short} message={'Company Name must contain at least 3 characters.'}/>
                                 <InputError isValid={isError.recipient_company_long} message={'Company Name must not exceed 35 characters.'}/>
@@ -980,6 +993,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 <p className='input-subtitle'>Country<span className='required-icon'>*</span></p>
                                 {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
                                 <Typeahead
+                                    className=' input-subtitle'
                                     id="basic-typeahead-single"
                                     labelKey="name"
                                     onChange={handleCountryChangeRecipient}
@@ -1002,18 +1016,18 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 <InputError isValid={isError.recipient_country} message={'Country is required*'}/>
                             </div>
                         </div>
-                        <div className="col-2">
+                        <div className="col-3">
                             <div className="form-group">
                                 <p className='input-subtitle'>Postal Code<span className='required-icon'>*</span></p>
-                                <input type="text" className="form-control" id="recipient_postal" aria-describedby="recipient_postal" name="recipient_postal" required onChange={(e)=>handleChange(e)} value={recipient.recipient_postal} />
+                                <input type="text" className="form-control input-subtitle" id="recipient_postal" aria-describedby="recipient_postal" name="recipient_postal" required onChange={(e)=>handleChange(e)} value={recipient.recipient_postal} />
                                 {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_postal} */}
                                 <InputError isValid={isError.recipient_postal} message={'Postal code is required*'}/>
                             </div>
                         </div>
-                        <div className="col-4">
+                        <div className="col-3">
                             <div className="form-group">
                                 <p className='input-subtitle'>State/Province<span className='required-icon'>*</span></p>
-                                <input type="text" className="form-control" id="recipient_state_code" aria-describedby="recipient_state_code" name="recipient_state_code" onChange={(e)=>handleChange(e)} value={recipient.recipient_state_code} />
+                                <input type="text" className="form-control input-subtitle" id="recipient_state_code" aria-describedby="recipient_state_code" name="recipient_state_code" onChange={(e)=>handleChange(e)} value={recipient.recipient_state_code} />
                                 {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_state_code} */}
                                 <InputError isValid={isError.recipient_state_code} message={'State is required*'}/>
                             </div>
@@ -1021,7 +1035,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col-3">
                                 <div className="form-group">
                                     <p className='input-subtitle'>City<span className='required-icon'>*</span></p>
-                                    <input type="text" className="form-control" id="recipient_city" aria-describedby="recipient_city" name="recipient_city" required onChange={(e)=>handleChange(e)} value={recipient.recipient_city} />
+                                    <input type="text" className="form-control input-subtitle" id="recipient_city" aria-describedby="recipient_city" name="recipient_city" required onChange={(e)=>handleChange(e)} value={recipient.recipient_city} />
                                     {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_city}  */}
                                     <InputError isValid={isError.recipient_city} message={'City must be at least 3 letters*'}/>
                                 </div>
@@ -1031,7 +1045,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col-4">
                                 <div className="form-group">
                                     <p className='input-subtitle'>Address Line 1<span className='required-icon'>*</span></p>
-                                    <input type="text" name="recipient_address1" className="form-control" id="recipient_address1" aria-describedby="recipient_address1" placeholder="Unit Number/ Building/ Street Number/ Village/ Barangay" maxLength="35" onChange={(e)=>handleChange(e)} required value={recipient.recipient_address1}/>
+                                    <input type="text" name="recipient_address1" className="form-control input-subtitle" id="recipient_address1" aria-describedby="recipient_address1" placeholder="Unit Number/ Building/ Street Number/ Village/ Barangay" maxLength="35" onChange={(e)=>handleChange(e)} required value={recipient.recipient_address1}/>
                                     {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_address1} */}
                                     <InputError isValid={isError.sender_address1} message={'Address 1 is required*'}/>
                                     <InputError isValid={isError.sender_address_len} message={'Address 1 must contain at least 3 characters.'}/>
@@ -1040,14 +1054,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col-4">
                                 <div className="form-group">
                                     <p className='input-subtitle'>Address Line 2</p>
-                                    <input type="text" className="form-control" id="recipient_address2" aria-describedby="recipient_address2" name="recipient_address2" maxLength="35" onChange={(e)=>handleChange(e)} value={recipient.recipient_address2}/>
+                                    <input type="text" className="form-control input-subtitle" id="recipient_address2" aria-describedby="recipient_address2" name="recipient_address2" maxLength="35" onChange={(e)=>handleChange(e)} value={recipient.recipient_address2}/>
                                     {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_address2} */}
                                 </div>
                             </div>
                             <div className="col-4">
                                 <div className="form-group">
                                     <p className='input-subtitle'>Address Line 3</p>
-                                    <input type="text" className="form-control" id="recipient_address3" aria-describedby="recipient_address3" name="recipient_address3" maxLength="35" onChange={(e)=>handleChange(e)} value={recipient.recipient_address3}/>
+                                    <input type="text" className="form-control input-subtitle" id="recipient_address3" aria-describedby="recipient_address3" name="recipient_address3" maxLength="35" onChange={(e)=>handleChange(e)} value={recipient.recipient_address3}/>
                                     {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_address2} */}
                                 </div>
                             </div>
@@ -1070,7 +1084,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 <div className="col-6">
                                 <div className="form-group">
                                     <p className='input-subtitle'>Email Address</p>
-                                    <input type="email" className="form-control" id="email-add" aria-describedby="email-add" name="recipient_email" onChange={(e)=>handleChange(e)} value={recipient.recipient_email} />
+                                    <input type="email" className="form-control input-subtitle" id="email-add" aria-describedby="email-add" name="recipient_email" onChange={(e)=>handleChange(e)} value={recipient.recipient_email} />
                                     {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_email} */}
                                 </div>
                             </div>
@@ -1225,10 +1239,10 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="form-group">
                                 <p className='input-subtitle'>Dimensions</p>
                                 <div className="input-group">
-                                <input type="number" className="form-control" aria-label="dimension" placeholder="length"value={maxLength} onChange={(e)=>{setMaxLength(e.target.value); setPackageDetails({...packageDetails, length:e.target.value})}} disabled={!isCustomPackaging} />
-                                <input type="number" className="form-control" aria-label="dimension" placeholder="width" value={maxWidth} onChange={(e)=>{setMaxWidth(e.target.value); setPackageDetails({...packageDetails, width:e.target.value})}} disabled={!isCustomPackaging} />
-                                <input type="number" className="form-control" aria-label="dimension" placeholder="height" value={maxHeight} onChange={(e)=>{setMaxHeight(e.target.value); setPackageDetails({...packageDetails, height:e.target.value})}} disabled={!isCustomPackaging} />
-                                <span className="input-group-text bg-white">cm</span>
+                                <input type="number" className="form-control input-subtitle" aria-label="dimension" placeholder="length"value={maxLength} onChange={(e)=>{setMaxLength(e.target.value); setPackageDetails({...packageDetails, length:e.target.value})}} disabled={!isCustomPackaging} />
+                                <input type="number" className="form-control input-subtitle" aria-label="dimension" placeholder="width" value={maxWidth} onChange={(e)=>{setMaxWidth(e.target.value); setPackageDetails({...packageDetails, width:e.target.value})}} disabled={!isCustomPackaging} />
+                                <input type="number" className="form-control input-subtitle" aria-label="dimension" placeholder="height" value={maxHeight} onChange={(e)=>{setMaxHeight(e.target.value); setPackageDetails({...packageDetails, height:e.target.value})}} disabled={!isCustomPackaging} />
+                                <span className="input-group-text bg-white  input-subtitle">cm</span>
                                 
                                 {/* value={maxLength} onChange={(e)=>{setMaxLength(e.target.value); setPackageDetails({...packageDetails, length:e.target.value})}} disabled={!isCustomPackaging} */}
                                 </div>
@@ -1238,7 +1252,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="form-group">
                             <p className='input-subtitle'>Max Weight<span className='required-icon'>*</span></p>
                             <div className="input-group">
-                                <input type="text" disabled className="form-control" aria-label="max-weight" value={maxWeight}/>
+                                <input type="text" disabled className="form-control input-subtitle" aria-label="max-weight" value={maxWeight}/>
                                 {/* value={maxWeight} disabled */}
                                 <div className="input-group-append">
                                     <span className="input-group-text bg-white input-subtitle">kg</span>
@@ -1390,11 +1404,13 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
                     <div className='row mb-4'>
                         <div className='col-4'></div>
-                        <div className='col-4'>
+                        <div className='col-4 center'>
                             <ReCAPTCHA 
+                                className='center'
                                 sitekey="6Lc4EiQhAAAAAOgVr1rGx6VUoM9z5fNk0zyPgnzY"
-                                data-callback="recaptchaCallback"
-                                onClick={recaptchaCallback}
+                                ref={captchaRef}
+                                //data-callback="recaptchaCallback"
+                                // onClick={recaptchaCallback}
                             />
                             
                         </div>
@@ -1403,7 +1419,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                     </div>
                     
                     
-                    <div className='row mb-6'>
+                    <div className='row mb-4'>
                         <div className="col-6 left mt-3">
                             <div className="form-group">
                                 <input type="checkbox" className="custom-control-inpu mr-10 " id="agreement" name="agreement" checked={agree} onChange={handleAgreeChange}/>
@@ -1414,17 +1430,18 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 <a className='pink-text'>Terms and conditions</a>
                             </div> 
                         </div>
-                        {/* <div className="col-3"></div> */}
-                        {/* <div className="col">
-                            <div className="form-group">
-                                <button className="btn-clear btn-rad right" data-bs-toggle="modal" data-bs-target="#exampleModal" > + Item </button>
-                                {/* onClick={openModal} 
-                            </div>
-                        </div>  */}
+                        
                         <div className="col-6">
-                            <div className="form-group">
-                                <button className="btn-blue btn-rad right mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={handleSubmit}> Next </button>
-                                <button className="btn-pink btn-rad right mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={handleClear} > Clear All </button>
+                            <div className="form-group row mb-6"></div>
+                            <div className="form-group row mt-2">
+                                <div className='col-3'></div>
+                                <div className='col-3'></div>
+                                <div className='col-3'>
+                                    <button className="btn-pink btn-rad right " data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={handleClear} > Clear All </button>
+                                </div>
+                                <div className='col-3'>
+                                    <button className="btn-blue btn-rad right" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={handleSubmit}> Next </button>
+                                </div>
                                 {/* onClick={openModal} */}
                             </div>
                         </div> 
@@ -1453,7 +1470,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                         {/* {hasResult ? "row":"row mb-4"} */}
                             <div className="input-group form-group">
-                                <input type="text" className="form-control search-input" aria-label="Search" placeholder="Search Item..."/>
+                                <input type="text" className="form-control search-input input-subtitle" aria-label="Search" placeholder="Search Item..."/>
                                 {/* value={searchInput} onChange={(e)=>setSearchInput(e.target.value)} */}
                                 <div className="input-group-append">
                                     <span className="input-group-text search-icon" id="basic-addon1">
@@ -1479,14 +1496,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                         {/* {hasResult ? "row mt-4 mb-4" : "row mb-4"} */}
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="description">Description </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
                             <div className="col">
-                                <div className="form-group">
+                                <div className="form-group ">
                                     <div className="input-group">
-                                        <input type="text" className="form-control" aria-label="description" name="description" value={item.description} onChange={(e)=>handleItemChange(e)}/>
+                                        <input type="text" className="form-control input-subtitle" aria-label="description" name="description" value={item.description} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.description} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
                                     <InputError isValid={isItemError.description} message={'Description is required*'}/>
@@ -1495,14 +1512,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                         <div className="row mb-4">
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="hs_code">HS Code </label>
                                 </div>
                             </div>
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="text" className="form-control" aria-label="hs_code" name="hs_code" value={item.hs_code} onChange={(e)=>handleItemChange(e)}/>
+                                        <input type="text" className="form-control input-subtitle" aria-label="hs_code" name="hs_code" value={item.hs_code} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.hs_code} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
                                     <InputError isValid={isItemError.hs_code} message={'HS Code is required*'}/>
@@ -1511,16 +1528,17 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                         <div className="row mb-4">
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="made_in">Made In </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col-3">
                                 <div className="form-group">
                                     <div className="input-group">
                                     <Typeahead
-                                        id="basic-typeahead-single"
+                                        id=""
                                         labelKey="name"
+                                        className='type input-subtitle'
                                         onChange={handleMadeChange}
                                         options={countries}
                                         placeholder="Enter a country"
@@ -1535,18 +1553,18 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 <InputError isValid={isItemError.made_in} message={'Made in is required*'}/>
                             </div>
                             
-                            <div className="col-2">
-                                <div className="form-group">
+                            <div className="col-3">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="weight">Weight </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col-3">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="weight" name="weight" value={item.weight} onChange={(e)=>handleItemChange(e)}/>
+                                        <input type="number" className="form-control input-subtitle" aria-label="weight" name="weight" value={item.weight} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.weight} onChange={(e)=>handleItemChange(e)} */}
                                         <div className="input-group-append">
-                                            <span className="input-group-text bg-white">kg</span>
+                                            <span className="input-group-text bg-white input-subtitle">kg</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1555,27 +1573,27 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                         <div className="row mb-4">
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="qty">Quantity </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col-3">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="qty" name="qty" value={item.qty} onChange={(e)=>handleItemChange(e)}/>
+                                        <input type="number" className="form-control input-subtitle" aria-label="qty" name="qty" value={item.qty} onChange={(e)=>handleItemChange(e)}/>
                                         {/* value={item.qty} onChange={(e)=>handleItemChange(e)} */}
                                     </div>
                                 </div>
                                 <InputError isValid={isItemError.qty} message={'Qty is required*'}/>
                             </div>
-                            <div className="col-2">
-                                <div className="form-group">
+                            <div className="col-3">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="unit">Unit </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col-3">
                                 <div className="form-group">
-                                    <div className="input-group">
+                                    <div className="input-group input-subtitle">
                                     <Form.Select size="md" name="unit" value={item.unit} onChange={handleItemChange}>
                                         <option value="PCS">PIECES</option>
                                         {units.map((data) => {return(<option class="color-black" key={data.id} value={data.key}>{data.name}</option>)})}
@@ -1587,14 +1605,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                         <div className="row mb-4">
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="customs_value">Customs Value </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="customs_value" name="customs_value" value={item.customs_value} onChange={(e)=>handleItemChange(e)}/>
+                                        <input type="number" className="form-control input-subtitle" aria-label="customs_value" name="customs_value" value={item.customs_value} onChange={(e)=>handleItemChange(e)}/>
                                     </div>
                                 </div>
                                 <InputError isValid={isItemError.customs_value} message={'Customs value is required*'}/>
@@ -1604,7 +1622,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col-6">
                                 <div className="form-group">
                                     <input type="checkbox" className="custom-control-inpu mr-10" id="new_item_profile" name="new_item_profile" checked={item.new_item_profile === "1"? true:false} onChange={(e)=>handleItemChange(e)}/>
-                                    <label className="custom-control-label pad-left5" htmlFor="new_item_profile">Save as new item profile</label>
+                                    <label className="custom-control-label pad-left5 input-subtitle" htmlFor="new_item_profile">Save as new item profile</label>
                                 </div>
                             </div>
                         </div>
@@ -1636,7 +1654,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                         {/* {hasResult ? "row":"row mb-4"} */}
                             <div className="input-group form-group">
-                                <input type="text" className="form-control search-input" aria-label="Search" placeholder="Search Item..." value={searchInput} onChange={(e)=>setSearchInput(e.target.value)}/>
+                                <input type="text" className="form-control search-input  input-subtitle" aria-label="Search" placeholder="Search Item..." value={searchInput} onChange={(e)=>setSearchInput(e.target.value)}/>
                                 <div className="input-group-append">
                                     <span className="input-group-text search-icon" id="basic-addon1">
                                     <img src={glass} alt="search" className="search-icon" /> 
@@ -1662,14 +1680,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                             {/* {hasResult ? "row mt-4 mb-4" : "row mb-4"} */}
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="description">Description </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="text" className="form-control" aria-label="description" name="description" value={editItem.description} onChange={(e)=>handleEditItemChange(e)}/>
+                                        <input type="text" className="form-control input-subtitle" aria-label="description" name="description" value={editItem.description} onChange={(e)=>handleEditItemChange(e)}/>
                                         {/* value={editItem.description} onChange={(e)=>handleEditItemChange(e)} */}
                                     </div>
                                     <InputError isValid={isItemError.description} message={'Description is required*'}/>
@@ -1678,14 +1696,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                         <div className="row mb-4">
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="hs_code">HS Code </label>
                                 </div>
                             </div>
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="text" className="form-control" aria-label="hs_code" name="hs_code" value={editItem.hs_code} onChange={handleEditItemChange} />
+                                        <input type="text" className="form-control input-subtitle" aria-label="hs_code" name="hs_code" value={editItem.hs_code} onChange={handleEditItemChange} />
                                         {/* value={editItem.hs_code} onChange={handleEditItemChange} */}
                                     </div>
                                     <InputError isValid={isItemError.hs_code} message={'HS Code is required*'}/>
@@ -1694,15 +1712,16 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                         <div className="row mb-4">
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="made_in">Made In </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col-3">
                                 <div className="form-group">
                                     <div className="input-group">
                                     <Typeahead
-                                        id="basic-typeahead-single"
+                                        id=""
+                                        className='type input-subtitle'
                                         labelKey="name"
                                         onChange={handleEditMadeChange}
                                         options={countries}
@@ -1713,17 +1732,17 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 </div>
                                 <InputError isValid={isItemError.made_in} message={'Made in is required*'}/>
                             </div>
-                            <div className="col-2">
-                                <div className="form-group">
+                            <div className="col-3">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="weight">Weight </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col-3">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="weight" name="weight" value={editItem.weight} onChange={(e)=>handleEditItemChange(e)} />
+                                        <input type="number" className="form-control input-subtitle" aria-label="weight" name="weight" value={editItem.weight} onChange={(e)=>handleEditItemChange(e)} />
                                         <div className="input-group-append">
-                                        <span className="input-group-text bg-white">kg</span>
+                                        <span className="input-group-text bg-white input-subtitle">kg</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1732,27 +1751,27 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                         <div className="row mb-4">
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="qty">Quantity </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col-3">
                                 <div className="form-group">
                                     <div className="input-group">
-                                        <input type="number" className="form-control" aria-label="qty" name="qty" value={editItem.qty} onChange={(e)=>handleEditItemChange(e)} />
+                                        <input type="number" className="form-control input-subtitle" aria-label="qty" name="qty" value={editItem.qty} onChange={(e)=>handleEditItemChange(e)} />
                                     </div>
                                 </div>
                                 <InputError isValid={isItemError.qty} message={'Qty is required*'}/>
                             </div>
-                            <div className="col-2">
-                                <div className="form-group">
+                            <div className="col-3">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="unit">Unit </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col-3">
                                 <div className="form-group">
                                     <div className="input-group">
-                                    <Form.Select size="md" name="unit" value={editItem.unit} onChange={handleEditItemChange} >
+                                    <Form.Select size="md" name="unit" className=' input-subtitle' value={editItem.unit} onChange={handleEditItemChange} >
                                         <option value="PCS">PIECES</option>
                                         {units.map((data) => {return(<option class="color-black" key={data.key} value={data.key}>{data.name}</option>)})}
                                     </Form.Select>
@@ -1763,14 +1782,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         </div>
                         <div className="row mb-4">
                             <div className="col-3">
-                                <div className="form-group">
+                                <div className="form-group input-subtitle">
                                     <label htmlFor="customs_value">Customs Value </label><label className="badge">{` *`}</label>
                                 </div>
                             </div>
                             <div className="col">
                                 <div className="form-group">
                                     <div className="input-group">   
-                                        <input type="number" className="form-control" aria-label="customs_value" name="customs_value" value={editItem.customs_value} onChange={(e)=>handleEditItemChange(e)} />
+                                        <input type="number" className="form-control input-subtitle" aria-label="customs_value" name="customs_value" value={editItem.customs_value} onChange={(e)=>handleEditItemChange(e)} />
                                     </div>
                                 </div>
                                 <InputError isValid={isItemError.customs_value} message={'Customs value is required*'}/>
@@ -1780,7 +1799,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="col-6">
                                 <div className="form-group">
                                     <input type="checkbox" className="custom-control-inpu mr-10" id="new_item_profile_edit" name="new_item_profile" checked={editItem.new_item_profile === "1"? true:false} onChange={(e)=>handleEditItemChange(e)} />
-                                    <label className="custom-control-label pad-left5" htmlFor="new_item_profile_edit"> Save as new item profile </label>
+                                    <label className="custom-control-label pad-left5 input-subtitle" htmlFor="new_item_profile_edit"> Save as new item profile </label>
                                 </div>
                             </div>
                         </div>
