@@ -18,6 +18,7 @@ import Navbar from '../../Components/Navbar/Navbar';
 import editicon from '../../Assets/Images/Form/edit_icon.png';
 import deleteicon from '../../Assets/Images/Form/delete_icon.png';
 import glass from "../../Assets/Images/Form/magnifying_glass.png";
+import { createFedexTransac } from '../../Helpers/ApiCalls/RatesApi';
 
 //ccs
 import "./InternationalForm.css"
@@ -183,9 +184,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         // console.log(documentCustoms)
         // console.log(documentDesc)
         // console.log(documentType)
-        console.log(token)
-        console.log(captchaRef)
-        console.log(agree&&captcha)
+        // console.log(token)
+        // console.log(captchaRef)
+        // console.log(agree&&captcha)
        // console.log(captchaRef)
 
 
@@ -393,12 +394,14 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
             setIsItem(false);
             setIsDocument(true);
         }
-        // setSendDetails({})
+         setSendDetails({})
     }
 
     // const updateRecaptcha = ()=>{
     //     setToken("")
     // }
+
+    // console.log(process.env.REACT_APP_LINK)
 
     const handleCountryChangeSender=(e)=>{
         setSingleSelectionsSender(e)
@@ -549,7 +552,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         //         setMaxWidth(data.max_width === "0.00" && (e.target.value === "2" || e.target.value === "1") ? "" : data.max_width)
         //         setMaxHeight(data.max_height === "0.00" && (e.target.value === "2" || e.target.value === "1") ? "" : data.max_height)
                  setUpperDetails({...upperDetails, packaging_type:e.target.value })
-        //         setPackageDetails({...packageDetails, length:data.max_length, width:data.max_width, height:data.max_height })
+                 setPackageDetails({...packageDetails, length:data.max_length, width:data.max_width, height:data.max_height })
         //     }
             if(e.target.value === "1")
                 setIsCustomPackaging(true)
@@ -670,13 +673,15 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         totalCustoms:totalcustoms,})
     }
 
+    console.log(sendDetails)
+
     const handleSubmit=(e)=>{
         e.preventDefault()
         if (captchaRef.current) {
             if (captchaRef.current.props.grecaptcha.getResponse().length !== 0) { 
                 setToken(captchaRef.current);
                 setCaptcha(true)
-                console.log(token)
+                //console.log(token)
                 captchaRef.current.reset();
             }
         }
@@ -684,8 +689,24 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         //console.log(sender)
         if(sender.sender_firstname !== "" || sender.sender_company !== "")
         {
-            if(recipient.recipient_firstname !== "" || recipient.recipient_company !== "") {
-                if(validateSender(sender, recipient, singleSelectionsSender, singleSelectionsRecipient , setIsError)){
+            if(recipient.recipient_firstname !== "" || recipient.recipient_company !== "") 
+            {
+                if(validateSender(sender, recipient, singleSelectionsSender, singleSelectionsRecipient , setIsError))
+                {
+                    //POSTAL AWARE CONDITION HERE
+                    // setIsClicked(true)
+                    // if(postalAware)
+                    // {
+                    //     if(recipient.recipient_postal === ""){
+                    //         setPostalValid(true)
+                    //         setLoading(false);
+                    //     }
+                    //     else{
+                    //         setPostalValid(false)
+                    //         IsValidPostal()
+                    //         setLoading(true);
+                    //     }
+                    // }
                     if(validatePackage(upperDetails, documentCustoms, documentDesc, documentType, documentWeight, maxWeight, data, setIsPackageError))
                     {
                         if(agree && captcha) 
@@ -695,6 +716,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 navigation.next()    
                             }, 2000)
                             if(upperDetails["detail_type"]==="item"){
+                                console.log(data)
                                 data.forEach(data => {
                                     for (let key in data) {
                                         if(key != "id"){
@@ -702,6 +724,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                                 data["new_item_profile"] = "0"
                                             }
                                             sendDetails[`${key}_${packageNumber}_${count}`] = `${data[key]}`;
+                                            console.log(sendDetails);
                                         }
                                     }
                                     count++
@@ -713,6 +736,8 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 packageDetails["total_package_content_1"] = data.length.toString()
                                 packageDetails["total_customs_value_1"] = item_customs
                                 upperDetails["total_weight"] = item_weights
+                                packageDetails["weight_1"] = item_weights.toString()
+
                             }
                             else{
                                 sendDetails[`description_${packageNumber}_${packageNumber}`]=documentDesc
@@ -743,8 +768,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
 
                                 packageDetails["weight_1"] = item_weights.toString()
                                 upperDetails["total_weight"] = upperDetails["total_weight"].toString()
-                            // _attemptcreateTransaction()
+                                // _attemptcreateTransaction()
                             }
+                            _attemptcreateTransaction()
                         }
                         else {
                             toast.error("PLEASE CHECK CAPTCHA AND AGREE TO THE TERMS AND CONDITIONS",{ autoClose: 2000, hideProgressBar: true })
@@ -753,7 +779,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                     else{
                         setLoadingPackage(false)
                     }
-                } 
+                
+                    
+                } //validatesender
             }
             else{
                 toast.error("PLEASE PROVIDE RECIPIENT COMPANY OR NAME",{ autoClose: 2000, hideProgressBar: true });
@@ -770,50 +798,53 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         // }
     }
 
-    // async function _attemptcreateTransaction(){
-    //     if(maxWeight != ""){
-    //         setLoadingPackage(true)
-    //         const response = await createFedexTransac(sender, recipient, 
-    //                                                 upperDetails, sendDetails, packageDetails)
-    //         if(response.error){
-    //             if(response.error.data?.messages?.error === "API key or token not authorized."){
-    //                 removeUserSession();
-    //             }
-    //             else{
-    //                 if(Array.isArray(response.error.data.messages.errors)){
-    //                     toast.error(response.error.data?.messages?.errors[0].code?.toUpperCase()+": "+response.error.data?.messages?.errors[0].message.toUpperCase(),{ autoClose: 4000, hideProgressBar: true })
-    //                 }
-    //                 else{
-    //                     toast.error(response.error.data?.messages?.error.toUpperCase(),{ autoClose: 4000, hideProgressBar: true })
-    //                 }
-                    
-    //                 setSendDetails([])
-    //                 setLoadingPackage(false)
-    //                 // setIsClicked(false)
-    //             }
-    //         }
-    //         if(response.data){
-    //             setGeneralDetails({
-    //                 detail_type: upperDetails["detail_type"],
-    //                 package_type: upperDetails["packaging_type"],
-    //                 service_type: upperDetails["service_type"],
-    //                 service_id: "1"
-    //             })
-    //             setTransactionDetails({...response.data})
-    //             setType("fedex")
-    //             // generalDetails["detail_type"] = upperDetails["detail_type"]
-    //             // generalDetails["package_type"] = upperDetails["packaging_type"]
-    //             // generalDetails["service_type"] = upperDetails["service_type"]
-    //             // generalDetails["service_id"] = "1"
-    //             toast.success("YOUR TRANSACTION WAS CREATED SUCCESSFULLY! REDIRECTING YOU TO PAYMENTS...",{ autoClose: 2000, hideProgressBar: true })
-    //             setTimeout(() => {
-    //                 navigation.next()
-    //                 setLoadingPackage(false)
-    //                 // navigateto("/payment/fedex", {state: {transactionDetails: response.data, generalDetails:generalDetails}})
-    //             }, 4000);
-    //         }
-    //     }
-    // }
+    async function _attemptcreateTransaction(){
+        if(maxWeight != ""){
+            setLoadingPackage(true)
+            console.log(sendDetails);
+            const response = await createFedexTransac(sender, recipient, 
+                                                    upperDetails, sendDetails, packageDetails)
+            if(response.error){
+                console.log(response.error);
+                if(response.error.data?.messages?.error === "API key or token not authorized."){
+                    //removeUserSession();
+                }
+                else{
+                    if(Array.isArray(response.error.data.messages.errors)){
+                        toast.error(response.error.data?.messages?.errors[0].code?.toUpperCase()+": "+response.error.data?.messages?.errors[0].message.toUpperCase(),{ autoClose: 4000, hideProgressBar: true })
+                    }
+                    else{
+                        toast.error(response.error.data?.messages?.error.toUpperCase(),{ autoClose: 4000, hideProgressBar: true })
+                    }
+                    console.log(response.error)
+                    setSendDetails([])
+                    setLoadingPackage(false)
+                    // setIsClicked(false)
+                }
+            }
+            if(response.data){
+                setGeneralDetails({
+                    detail_type: upperDetails["detail_type"],
+                    package_type: upperDetails["packaging_type"],
+                    service_type: upperDetails["service_type"],
+                    service_id: "1"
+                })
+                setTransactionDetails({...response.data})
+                setType("fedex")
+                console.log(response.data)
+                // generalDetails["detail_type"] = upperDetails["detail_type"]
+                // generalDetails["package_type"] = upperDetails["packaging_type"]
+                // generalDetails["service_type"] = upperDetails["service_type"]
+                // generalDetails["service_id"] = "1"
+                toast.success("YOUR TRANSACTION WAS CREATED SUCCESSFULLY! REDIRECTING YOU TO PAYMENTS...",{ autoClose: 2000, hideProgressBar: true })
+                setTimeout(() => {
+                    navigation.next()
+                    setLoadingPackage(false)
+                    // navigateto("/payment/fedex", {state: {transactionDetails: response.data, generalDetails:generalDetails}})
+                }, 4000);
+            }
+        }
+    }
 
     if(redirect === "next") {
         return <Navigate to="/Confirmation"/>
@@ -866,18 +897,6 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     placeholder="Enter a country"
                                     selected={singleSelectionsSender}
                                 />
-                                {/* <select
-                                    className="filter-dropdown form-control"
-                                    name="sender_country"
-                                    onChange={handleCountryChange}
-                                    value={sender.sender_country}
-                                    //onChange={(e) => handleFilterChange(e)}
-                                    >
-                                    <option value="">Country</option>
-                                    <option value="Sample 1">Sample 1</option>
-                                    <option value="Sample 2">Sample 2</option>
-                                    <option value="Sample 3">Sample 3</option>
-                                </select> */}
                                 <InputError isValid={isError.sender_country} message={'Country is required*'}/>
                             </div>
                         </div>
@@ -896,14 +915,6 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="form-group">
                                 <p className='input-subtitle'>State/Province<span className='required-icon'>*</span></p>
                                 <input type="text" name="sender_state_code" className="form-control input-subtitle" id="sender_state_code" aria-describedby="sender_state_code" required onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_state_code}/>
-                                {/* <Typeahead
-                                    id="basic-typeahead-single"
-                                    labelKey="name"
-                                    onChange={handleProvinceChange}
-                                    options={provinces}
-                                    placeholder="Enter a province"
-                                    selected={provinceSelections}
-                                /> */}
                                 <InputError isValid={isError.sender_state_code} message={'State/Province is required*'}/>
                             </div>
                         </div>
@@ -956,7 +967,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     <div className="input-group-prepend">
                                     <span className="input-group-text input-subtitle" id="basic-addon1">+63</span>
                                     </div>
-                                        <input type="number" name="sender_contact_no" className="form-control input-subtitle" aria-label="contact" aria-describedby="basic-addon1" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_contact_no}/>
+                                        <input type="number" onWheel={() => document.activeElement.blur()} name="sender_contact_no" className="form-control input-subtitle" aria-label="contact" aria-describedby="basic-addon1" onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_contact_no} />
                                         {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_contact_no} */}
                                 </div>
                                 <InputError isValid={isError.sender_contact_no} message={'Contact no. is required*'}/>
@@ -1012,18 +1023,6 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     placeholder="Enter a country"
                                     selected={singleSelectionsRecipient}
                                 />
-                                {/* <select
-                                    className="filter-dropdown form-control"
-                                    name="recipient_country"
-                                    onChange={(e)=>handleChange(e)}
-                                    value={recipient.recipient_country}
-                                    //onChange={(e) => handleFilterChange(e)}
-                                    >
-                                    <option value="">Country</option>
-                                    <option value="Sample 1">Sample 1</option>
-                                    <option value="Sample 2">Sample 2</option>
-                                    <option value="Sample 3">Sample 3</option>
-                                </select> */}
                                 <InputError isValid={isError.recipient_country} message={'Country is required*'}/>
                             </div>
                         </div>
@@ -1132,11 +1131,11 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     className="filter-dropdown form-control bg-grey"
                                     name="shipService"
                                     //onChange={(e) => handleFilterChange(e)}
-                                    value={upperDetails.service_type} 
+                                    //value={upperDetails.service_type} 
                                     onChange={handleSelectChange}
                                     >
                                     <option value="FEDEX_INTERNATIONAL_PRIORITY">FedEx International Priority®</option>
-                                    <option value="FEDEX_INTERNATIONAL_PRIORITY">FedEx International Priority® Express</option>
+                                    <option value="FEDEX_INTERNATIONAL_PRIORITY_EXPRESS">FedEx International Priority® Express</option>
                                 
                                 </select>
                             </div>
@@ -1172,9 +1171,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
                                         <option value="">Select</option>
-                                        <option value="custom">Custom</option>
-                                        <option value="letter">Letter</option>
-                                        <option value="box">box</option>
+                                        <option value="1">Custom</option>
+                                        <option value="2">Letter</option>
+                                        <option value="3">box</option>
                                     </select>
                                     <InputError isValid={isPackageError.packaging_type} message={'Package type is required*'}/>
                                 </div>
@@ -1186,7 +1185,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     <select
                                         className="filter-dropdown form-control bg-grey"
                                         name="shipmentPurpose"
-                                        value={upperDetails.purpose} 
+                                       // value={upperDetails.purpose} 
                                         onChange={handleSelectChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
@@ -1206,7 +1205,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                     <select
                                         className="filter-dropdown form-control bg-grey"
                                         name="invoice"
-                                        value={upperDetails.customs_invoice} 
+                                        //value={upperDetails.customs_invoice} 
                                         onChange={handleSelectChange}
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
@@ -1237,9 +1236,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                         //onChange={(e) => handleFilterChange(e)}
                                         >
                                         <option value="">Select</option>
-                                        <option value="custom">Custom</option>
-                                        <option value="letter">Letter</option>
-                                        <option value="box">box</option>
+                                        <option value="1">Custom</option>
+                                        <option value="2">Letter</option>
+                                        <option value="3">box</option>
                                     </select>
                                     <InputError isValid={isPackageError.packaging_type} message={'Package type is required*'}/>
                                 </div>
@@ -1263,7 +1262,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="form-group">
                             <p className='input-subtitle'>Max Weight<span className='required-icon'>*</span></p>
                             <div className="input-group">
-                                <input type="text" disabled className="form-control input-subtitle" aria-label="max-weight" value={maxWeight}/>
+                                <input type="text" className="form-control input-subtitle" aria-label="max-weight" />
                                 {/* value={maxWeight} disabled */}
                                 <div className="input-group-append">
                                     <span className="input-group-text bg-white input-subtitle">kg</span>

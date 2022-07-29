@@ -6,7 +6,7 @@ export const createFedexTransac = async (sender, recipient, upper, package_detai
         // recipient.ship_date = recipient.ship_date.getMonth()+1 + "/" + recipient.ship_date.getDate() +"/"+ recipient.ship_date.getFullYear()
 
         const payload = {
-          ...currentuser,
+          //...currentuser,
           ...sender,
           ...recipient,
           ...upper,
@@ -15,10 +15,10 @@ export const createFedexTransac = async (sender, recipient, upper, package_detai
         }
         // console.log("payload_under")
         // console.log(payload)
-        const response = await postAPICall( process.env.REACT_APP_LINK + 'public_fedex_transactions/compute_rates_and_transit', {
+        const response = await postAPICall( 'https://uat-api.2gosuite.2go.com.ph/' + 'public_fedex_transactions/compute_rates_and_transit', {
           ...payload
         });
-        // console.log(response);
+         console.log(response);
         return ({data:response.data});   
     } catch (error) {
         return ({error: error.response});
