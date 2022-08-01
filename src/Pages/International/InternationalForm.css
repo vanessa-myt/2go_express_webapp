@@ -40,6 +40,10 @@ header {
     display: none;
 }
 
+.mt-0 {
+    margin-top: 0%;
+}
+
 .mt-2 {
     margin-top: 2%;
 }
@@ -56,8 +60,18 @@ header {
     margin-left: 5px;
 }
 
+.ml-11 {
+    margin-left: 11px;
+}
+
 .mr-5 {
     margin-left: 5%;
+}
+
+.w-auto{
+    width: auto;
+    height: 35px;
+    padding: 0%;
 }
 
 .asterisk {
@@ -87,6 +101,13 @@ header {
 }
 
 .btn-pink:hover{
+    background-color: #EC0B8C;
+    color: white;
+    border: 2px solid #EC0B8C;
+    font-family: 'Gotham-Rounded-Bold';
+}
+
+.btn-tab{
     background-color: #EC0B8C;
     color: white;
     border: 2px solid #EC0B8C;

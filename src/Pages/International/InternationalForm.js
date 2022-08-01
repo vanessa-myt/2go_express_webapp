@@ -823,7 +823,16 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         <Navbar></Navbar>
         <h1 className="row mb-4 text-center header title mt-5 ml-5">PLACE BOOKING</h1>    
 
-        <div className="container form-cont">
+        <div className='row left'>
+            <div className='col-3 w-auto ml-11'>
+                <button className='btn-tab btn-rad title'> International </button>
+            </div>
+            <div className='col-3 w-auto'>
+                <button className='btn-tab btn-rad title'> Local </button>
+            </div>
+        </div>
+
+        <div className="container form-cont mt-0 main-cont">
             <ToastContainer/>
 
             {/* SENDER */}
@@ -886,7 +895,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="col-3">
                             <div className="form-group">
                                 <p className='input-subtitle'>City<span className='required-icon'>*</span></p>
-                                <input type="text" name="sender_city" className="form-control input-subtitle" id="sender_city" aria-describedby="sender_city" required onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})}/>
+                                <input type="text" name="sender_city" className="form-control input-subtitle" id="sender_city" aria-describedby="sender_city" required onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} value={sender.sender_city}/>
                                 {/* <Typeahead
                                     id="basic-typeahead-single"
                                     labelKey="name"
@@ -1227,7 +1236,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             <div className="form-group">
                             <p className='input-subtitle'>Max Weight<span className='required-icon'>*</span></p>
                             <div className="input-group">
-                                <input type="text" className="form-control input-subtitle" aria-label="max-weight" />
+                                <input type="text" className="form-control input-subtitle" aria-label="max-weight" value={maxWeight} disabled />
                                 {/* value={maxWeight} disabled */}
                                 <div className="input-group-append">
                                     <span className="input-group-text bg-white input-subtitle">kg</span>
@@ -1473,7 +1482,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         {/* {hasResult ? "row mt-4 mb-4" : "row mb-4"} */}
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="description">Description </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Description<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col">
@@ -1505,7 +1514,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="made_in">Made In </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Made In<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col-3">
@@ -1531,7 +1540,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="weight">Weight </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Weight<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col-3">
@@ -1550,7 +1559,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="qty">Quantity </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Quantity<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col-3">
@@ -1564,7 +1573,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             </div>
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="unit">Unit </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Unit<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col-3">
@@ -1582,7 +1591,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="customs_value">Customs Value </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Customs Value<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col">
@@ -1657,7 +1666,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             {/* {hasResult ? "row mt-4 mb-4" : "row mb-4"} */}
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="description">Description </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Description<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col">
@@ -1689,7 +1698,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="made_in">Made In </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Made In<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col-3">
@@ -1710,7 +1719,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             </div>
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="weight">Weight </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Weight<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col-3">
@@ -1728,7 +1737,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="qty">Quantity </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Quantity<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col-3">
@@ -1741,7 +1750,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                             </div>
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="unit">Unit </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Unit<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col-3">
@@ -1759,7 +1768,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                         <div className="row mb-4">
                             <div className="col-3">
                                 <div className="form-group input-subtitle">
-                                    <label htmlFor="customs_value">Customs Value </label><label className="badge">{` *`}</label>
+                                    <p className='input-subtitle'>Customs Value<span className='required-icon'>*</span></p>
                                 </div>
                             </div>
                             <div className="col">
