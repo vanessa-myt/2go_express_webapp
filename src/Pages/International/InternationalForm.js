@@ -19,6 +19,7 @@ import editicon from '../../Assets/Images/Form/edit_icon.png';
 import deleteicon from '../../Assets/Images/Form/delete_icon.png';
 import glass from "../../Assets/Images/Form/magnifying_glass.png";
 import { createFedexTransac } from '../../Helpers/ApiCalls/RatesApi';
+import { fetchCountries } from '../../Helpers/ApiCalls/DropdownsApi';
 
 //ccs
 import "./InternationalForm.css"
@@ -83,6 +84,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     const[citiesDropDown, setCitiesDropDown] = useState([]);
     const[cities, setCities] = useState([]);
     const[provinces, setProvinces] = useState([]);
+    // const [countries, setCountries] = useState([])
     const[searchInput, setSearchInput] = useState("");
     const [itemModal, setItemModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -261,55 +263,6 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
           customs_value:false,
       })
 
-
-    // const handleSaveItem=(e)=>{
-    //     setIndex(index+1)
-    //     var totalqty=0, totalweight=0, totalcustoms=0
-    //     var newdata
-    //     if(e.target.value === "add_item"){
-    //         if(validateItemDetails(item, setIsItemError)) {
-    //             item["id"] = index+1
-    //             if(item.new_item_profile === "" || item.new_item_profile === undefined){
-    //                 setItem({new_item_profile:"0"})    
-    //             }
-    //             setData([...data, item]);
-    //             newdata = [...data, item]
-    //             setItem({unit:"PCS", new_item_profile:"0", hs_code:""})
-    //             setItemModal(false);
-    //             setCountrySelections([])
-    //         }
-           
-    //     }
-    //     if(e.target.value === "edit_item"){
-    //         if(validateItemDetails(editItem, setIsItemError)) {
-    //             newdata = [...data]
-    //             const indexdata = data.findIndex((data)=> data.id === itemID)
-    //             newdata[indexdata].id = editItem.id
-    //             newdata[indexdata].description = editItem.description
-    //             newdata[indexdata].hs_code = editItem.hs_code?editItem.hs_code:""
-    //             newdata[indexdata].made_in = editItem.made_in
-    //             newdata[indexdata].qty = editItem.qty
-    //             newdata[indexdata].unit = editItem.unit
-    //             newdata[indexdata].weight = editItem.weight 
-    //             newdata[indexdata].customs_value = editItem.customs_value 
-    //             newdata[indexdata].new_item_profile = editItem.new_item_profile 
-    //             setData(newdata)
-    //             setEditItemModal(false);
-    //             setIsEditing(false)
-    //             setCountrySelections([])
-    //         }
-    //     }
-        
-    //     newdata.forEach(element => {
-    //         totalqty += parseFloat(element.qty);
-    //         totalweight += parseFloat(element.weight);
-    //         totalcustoms += parseFloat(element.customs_value);
-    //       });
-    //     setItemTotals({ 
-    //     totalQty:totalqty,
-    //     totalWeight:totalweight,
-    //     totalCustoms:totalcustoms,})
-    // }
 
     const handleModalClose=()=>{
         setItemModal(false);
@@ -601,30 +554,9 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         else{
           setAgree(false)
         }
-      }
+    }
 
 
-
-    //   function recaptchaCallback(){
-    //     if (grecaptcha.getResponse() == ""){
-    //         setCaptcha(false)
-    //         // alert("You can't proceed!");
-    //     } else {
-    //         setCaptcha(true)
-    //         // alert("Thank you");
-    //     }
-          
-    //   }
-
-      
-      
-    //   function isCaptchaChecked() {
-    //     return grecaptcha && grecaptcha.getResponse().length !== 0;
-    //   }
-
-
-
-    //console.log(captcha)
 
     const handleSaveItem=(e)=>{
         setIndex(index+1)
@@ -673,6 +605,31 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         totalQty:totalqty,
         totalWeight:totalweight,
         totalCustoms:totalcustoms,})
+    }
+
+    async function getCountries() {
+        const response = await fetchCountries();
+        if(response.error){
+            if(response.error.data.messages.error === "API key or token not authorized."){
+                //removeUserSession();
+            }
+        }
+        else{
+            // uncomment when setcountry is uncommented
+            // setCountries(response.data.filter((data)=>data.alpha_code != "PH"));
+        }
+        setSingleSelectionsRecipient([{
+            name:
+                recipient.recipient_country !== "" ?
+                countries.filter(data=> data.alpha_code === recipient.recipient_country)[0].name : "",
+            alpha_code:recipient.recipient_state_code
+        }])
+        setSingleSelectionsSender([{
+            name:
+                recipient.recipient_country !== "" ?
+                countries.filter(data=> data.alpha_code === recipient.recipient_country)[0].name : "",
+            alpha_code:recipient.recipient_state_code
+        }])
     }
 
     //console.log(captcha)
@@ -851,6 +808,12 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     if(redirect === "next") {
         return <Navigate to="/Confirmation"/>
     }
+
+     /* API Calls */
+    // useEffect( () => {
+    //     getCountries();
+        
+    // },[])
 
     // console.log(isItem)
     // console.log(isDocument)
