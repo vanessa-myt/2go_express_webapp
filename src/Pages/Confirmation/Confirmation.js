@@ -55,7 +55,7 @@ function Summary({sender, setSender, recipient, setRecipient, provinceSelections
         setIsDocument(true);
     }
 
-    console.log(documentType)
+    //console.log(documentType)
 
     return (
         <div className='container'>

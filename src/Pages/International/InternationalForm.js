@@ -22,6 +22,7 @@ import { createFedexTransac } from '../../Helpers/ApiCalls/RatesApi';
 
 //ccs
 import "./InternationalForm.css"
+import { refreshPage } from '../../Helpers/Utils/Common';
 
 function InternationalForm({sender, setSender, recipient, setRecipient, provinceSelections, setProvinceSelections, isItem, setIsItem, isDocument, 
                             setIsDocument, upperDetails, setUpperDetails, sendDetails, setSendDetails, navigation, index, item, setItem, setIndex,
@@ -582,6 +583,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         //setRecipient({...recipient, ship_date:new Date()})
         setSearchInput("")
         setSingleSelectionsRecipient([])
+        refreshPage()
     }
 
     const handleClearItem=()=>{
@@ -673,16 +675,16 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         totalCustoms:totalcustoms,})
     }
 
-    console.log(sendDetails)
+    //console.log(captcha)
 
     const handleSubmit=(e)=>{
         e.preventDefault()
-        if (captchaRef.current) {
+        if (captchaRef.current && !captcha ) {
             if (captchaRef.current.props.grecaptcha.getResponse().length !== 0) { 
                 setToken(captchaRef.current);
                 setCaptcha(true)
-                //console.log(token)
-                captchaRef.current.reset();
+                console.log(captchaRef)
+                //captchaRef.current.reset();
             }
         }
         
@@ -716,7 +718,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                 navigation.next()    
                             }, 2000)
                             if(upperDetails["detail_type"]==="item"){
-                                console.log(data)
+                                //console.log(data)
                                 data.forEach(data => {
                                     for (let key in data) {
                                         if(key != "id"){
@@ -724,7 +726,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
                                                 data["new_item_profile"] = "0"
                                             }
                                             sendDetails[`${key}_${packageNumber}_${count}`] = `${data[key]}`;
-                                            console.log(sendDetails);
+                                            //console.log(sendDetails);
                                         }
                                     }
                                     count++
@@ -801,7 +803,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     async function _attemptcreateTransaction(){
         if(maxWeight != ""){
             setLoadingPackage(true)
-            console.log(sendDetails);
+            //console.log(sendDetails);
             const response = await createFedexTransac(sender, recipient, 
                                                     upperDetails, sendDetails, packageDetails)
             if(response.error){
