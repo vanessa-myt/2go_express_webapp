@@ -60,8 +60,8 @@ header {
     margin-left: 5px;
 }
 
-.ml-11 {
-    margin-left: 11px;
+.ml-15 {
+    margin-left: 15px;
 }
 
 .mr-5 {
@@ -70,8 +70,15 @@ header {
 
 .w-auto{
     width: auto;
-    height: 35px;
     padding: 0%;
+}
+
+.w-190 {
+    width: 190px;
+}
+
+.h-35 {
+    height: 35px;
 }
 
 .asterisk {
@@ -107,11 +114,29 @@ header {
     font-family: 'Gotham-Rounded-Bold';
 }
 
-.btn-tab{
+.btn-tab-active{
     background-color: #EC0B8C;
     color: white;
     border: 2px solid #EC0B8C;
     font-family: 'Gotham-Rounded-Bold';
+
+    border-radius: 10px;
+    width:190px;
+    height:190px;
+    max-height: 50px;
+}
+
+.btn-tab{
+    background-color: white;
+    color: #EC0B8C;
+    border: 2px solid white;
+    font-family: 'Gotham-Rounded-Bold';
+    box-shadow: 3px 2px 5px grey;
+
+    border-radius: 10px;
+    width:190px;
+    height:190px;
+    max-height: 50px;
 }
 
 .btn-rad{
@@ -382,6 +407,16 @@ input[type=number]::-webkit-outer-spin-button {
     .btn-next {
         width: 50px !important;
         margin-left: 0vw;
+    }
+
+    .btn-tab {
+        width: 40vw !important;
+        /* margin-left: -40px; */
+    }
+
+    .btn-tab-active {
+        width: 40vw !important;
+        /* margin-left: -40px; */
     }
 }
 

@@ -98,6 +98,7 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
     //const [captcha ,setCaptcha] = useState(false)
     const captchaRef = useRef()
     const [token , setToken] = useState("");
+    const [tabActive, setTabActive] = useState("1");
     
     let packageNumber = 1;
     let item_weights = 0
@@ -262,6 +263,10 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
           weight:false,
           customs_value:false,
       })
+
+    const handleTabActive = (event) => {
+        setTabActive(event.target.id);
+    }
 
 
     const handleModalClose=()=>{
@@ -823,12 +828,22 @@ function InternationalForm({sender, setSender, recipient, setRecipient, province
         <Navbar></Navbar>
         <h1 className="row mb-4 text-center header title mt-5 ml-5">PLACE BOOKING</h1>    
 
-        <div className='row left'>
-            <div className='col-3 w-auto ml-11'>
-                <button className='btn-tab btn-rad title'> International </button>
+        <div className='row left h-35'>
+            <div className='col-3 w-auto ml-15'>
+                <button 
+                    key={1}
+                    id={"1"}
+                    className={tabActive === "1" ? 'btn-tab-active left' : 'btn-tab left'}
+                    onClick={handleTabActive}
+                    > International </button>
             </div>
             <div className='col-3 w-auto'>
-                <button className='btn-tab btn-rad title'> Local </button>
+                <button 
+                    key={2}
+                    id={"2"}
+                    className={tabActive === "2" ? 'btn-tab-active left' : 'btn-tab left'}
+                    onClick={handleTabActive}
+                    > Local </button>
             </div>
         </div>
 
