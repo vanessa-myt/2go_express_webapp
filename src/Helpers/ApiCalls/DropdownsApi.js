@@ -3,7 +3,9 @@ import { getAPICall, postAPICall, putAPICall, deleteAPICall, API_KEY, TOKEN } fr
 // Countries API
 export const fetchCountries = async () => {
     try {
-        const response = await postAPICall( process.env.REACT_APP_LINK + 'public_fedex_transactions/countries/get');
+        // console.log()
+        console.log("applink",process.env.REACT_APP_LINK )
+        const response = await postAPICall( process.env.REACT_APP_LINK + 'countries/get');
   
         console.log(response);
         return ({data:response.data.data});   
