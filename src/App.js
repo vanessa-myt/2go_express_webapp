@@ -18,7 +18,7 @@ import BookingSuccess from "./Pages/BookingSuccess/BookingSuccess";
 
 function App() {
   document.title = "2GO BOOKING";
-  document.body.style = "background: #F3F3F3;";
+  document.body.style = "background: white;";
 
   return (
     <div className="App">
