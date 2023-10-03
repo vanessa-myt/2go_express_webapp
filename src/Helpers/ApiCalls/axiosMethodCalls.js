@@ -8,7 +8,8 @@ export var TOKEN = "uEhp1rwt4Dehn0v0duluYzEGu9IhPFdB0BoYLNbnuPYeNWx5uA"
 
 let config = {
     headers: {
-        "api-key" : "daccfc89-ff47-4ce1-99bf-5ad2d8f57282",
+
+        "token" : "ba9dfa1a-4879-11ee-86c0-0209f4cb5e6e",
         "Content-Type": "application/json",
     }
 }
