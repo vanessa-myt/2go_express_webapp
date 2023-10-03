@@ -1,3 +1,20 @@
+/* -- CUSTOM DEFINED VARIABLES */
+:root {
+  --primary-color: #ec0b8c;
+  --secondary-color: #2a96c6;
+  --tertiary-color: #c90f75;
+  --dropdown-bg: #ecf2f4;
+
+  --main-text-color: #31302f;
+
+  --font-bold: "Gotham-Rounded-Bold";
+  --font-medium: "Gotham-Rounded-Medium";
+  --font-light: "Gotham-Rounded-Light";
+  --font-number: "Varela Round";
+
+  --cancel-btn: #ff4141;
+}
+
 .App {
   text-align: center;
 }
