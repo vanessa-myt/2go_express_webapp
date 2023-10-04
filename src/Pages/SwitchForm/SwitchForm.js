@@ -8,7 +8,13 @@ import {
   formatYMD,
   getTodayDate,
 } from "../../Helpers/Utils/Common"
-import { fetchCountries } from "../../Helpers/ApiCalls/DropdownsApi"
+import {
+  fetchCommodityDescriptions,
+  fetchCountries,
+  fetchPackages,
+  fetchServices,
+} from "../../Helpers/ApiCalls/DropdownsApi"
+import BookingSuccess from "../BookingSuccess/BookingSuccess"
 
 function SwitchForm() {
   const date = formatYMD(getTodayDate())
@@ -60,6 +66,7 @@ function SwitchForm() {
     // {id: "payment"},
     { id: "international" },
     { id: "summary" },
+    {id: "success"}
   ]
 
   const [captcha, setCaptcha] = useState(false)
@@ -141,9 +148,13 @@ function SwitchForm() {
     totalCustoms: "",
   })
   const [countries, setCountries] = useState([])
-
+  const [services, setServices] = useState([])
+  const [packages, setPackages] = useState([])
+  const [packageList, setPackageList] = useState([])
+  const [commodities, setCommodities] = useState([])
   //payment
   const [type, setType] = useState("")
+
 
   const { step, navigation } = useStep({
     steps,
@@ -310,15 +321,18 @@ function SwitchForm() {
     type,
     generalDetails,
     transactionDetails,
-    upperDetails,
-    packageDetails,
     singleSelectionsSender,
     setSingleSelectionsSender,
     singleSelectionsRecipient,
     setSingleSelectionsRecipient,
     captcha,
     setCaptcha,
-    countries,navigation,
+    countries,
+    services,
+    packageList,
+    packages,
+    setPackages,
+    commodities
   }
 
   const summaryProps = {
@@ -405,15 +419,15 @@ function SwitchForm() {
     setCaptcha,
   }
 
+  const successProps = {navigation, transactionDetails, generalDetails}
+
   async function getCountries() {
     const response = await fetchCountries()
     console.log(response)
     if (response.error) {
     }
     if (response.data) {
-      setCountries(
-        response.data.filter((data) => data.alpha_code != "PH")
-      )
+      setCountries(response.data.filter((data) => data.alpha_code != "PH"))
     }
     setSingleSelectionsRecipient([
       {
@@ -427,24 +441,48 @@ function SwitchForm() {
       },
     ])
   }
+
+  async function getServices() {
+    const response = await fetchServices()
+    console.log("services", response.data)
+    if (response.error) {
+    } else {
+      setServices(response.data)
+    }
+  }
+
+  async function getPackages() {
+    const response = await fetchPackages()
+    console.log("packages", response.data.data)
+    if (response.error) {
+    } else {
+      // isItem && setPackages(response.data.data.filter(data => data.id !== "3"));
+      // isDocument && setPackages(response.data.data.filter(data => data.id === "3" || data.id === "11"));
+      setPackageList(response.data.data)
+      setPackages(response.data.data.filter(data => data.id !== "3"))
+    }
+  }
+
+  async function getCommodities(){
+    const response = await fetchCommodityDescriptions()
+    
+    if(response.data){
+      setCommodities(response.data.data)
+    }
+  }
   useEffect(() => {
     getCountries()
+    getServices()
+    getPackages()
+    getCommodities()
   }, [])
   switch (step.id) {
-    // case "sender":
-    //     return <Sender { ...senderProps }/>
-    // case "recipient":
-    //     return <Recipient { ...recipientProps}/>
-    // case "packages":
-    //     return <Package { ...packageProps }/>
-    // case "summary":
-    //     return <Summary {...summaryProps}/>
-    // case "payment":
-    //     return <Payment {...paymentProps}/>
     case "international":
       return <InternationalForm {...internationalProps} />
     case "summary":
       return <Confirmation {...summaryProps} />
+      case "success":
+        return <BookingSuccess {...successProps}/>
   }
 
   return <div></div>
