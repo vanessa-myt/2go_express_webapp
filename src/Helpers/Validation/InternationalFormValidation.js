@@ -44,13 +44,6 @@ export const validateSender = (data, recipient, singleSelectionsSender, singleSe
     // }
 
     //SENDER
-    if(data.sender_country === "" || singleSelectionsSender.length <=0) {
-        handleValidationChange("sender_country", true, setIsError);
-        isValidCountry = false;
-    } else {
-        handleValidationChange("sender_country", false, setIsError);
-        isValidCountry = true;
-    }
 
     if(data.sender_city === "") {
         handleValidationChange("sender_city", true, setIsError);
