@@ -24,7 +24,10 @@ import editicon from "../../Assets/Images/Form/edit_icon.png"
 import deleteicon from "../../Assets/Images/Form/delete_icon.png"
 import glass from "../../Assets/Images/Form/magnifying_glass.png"
 import { createFedexTransac } from "../../Helpers/ApiCalls/RatesApi"
-import { fetchCountries } from "../../Helpers/ApiCalls/DropdownsApi"
+import {
+  fetchCountries,
+  validatePostal,
+} from "../../Helpers/ApiCalls/DropdownsApi"
 
 //ccs
 import "./InternationalForm.css"
@@ -104,7 +107,6 @@ function InternationalForm({
   type,
   generalDetails,
   transactionDetails,
-
   singleSelectionsSender,
   setSingleSelectionsSender,
   singleSelectionsRecipient,
@@ -112,6 +114,11 @@ function InternationalForm({
   captcha,
   setCaptcha,
   countries,
+  services,
+  packageList,
+  packages,
+  setPackages,
+  commodities,
 }) {
   //item table headers
   const headers = [
@@ -196,7 +203,7 @@ function InternationalForm({
   const [tabActive, setTabActive] = useState("1")
 
   const handleCountryChange = (e) => {
-    setSingleSelections(e)
+    setSingleSelectionsRecipient(e)
     if (e.length > 0) {
       setRecipient({ ...recipient, recipient_country: e[0].alpha_code })
       countries.forEach((data) => {
@@ -349,6 +356,7 @@ function InternationalForm({
     documentCustoms: false,
     documentType: false,
     documentDesc: false,
+    documentDesc_comm_error: false,
     documentWeight: false,
     compareWeight: false,
 
@@ -359,6 +367,7 @@ function InternationalForm({
   // REQUIRED ERROR HANDLING FOR ITEM DETAILS
   const [isItemError, setIsItemError] = useState({
     description: false,
+    description_comm_error: false,
     // hs_code:false,
     made_in: false,
     qty: false,
@@ -452,10 +461,30 @@ function InternationalForm({
       upperDetails["detail_type"] = "item"
       setIsItem(true)
       setIsDocument(false)
+      upperDetails["packaging_type"] = ""
+      setPackages(packageList.filter((data) => data.id !== "3"))
+      setMaxWeight("0")
+      setMaxLength("")
+      setMaxWidth("")
+      setMaxHeight("")
     } else {
       upperDetails["detail_type"] = "document"
       setIsItem(false)
       setIsDocument(true)
+      upperDetails["packaging_type"] = ""
+      setPackages(
+        packageList.filter((data) => data.id === "3" || data.id === "11")
+      )
+
+      setMaxWeight("0")
+      setMaxLength("")
+      setMaxWidth("")
+      setMaxHeight("")
+
+      console.log(
+        "doc packages",
+        packageList.filter((data) => data.id === "3" || data.id === "11")
+      )
     }
     setSendDetails({})
   }
@@ -621,6 +650,41 @@ function InternationalForm({
     //     else
     //         setAddActualWeight(false)
     // })
+    packages.forEach((data) => {
+      if (data.id === e.target.value) {
+        setMaxWeight(data.max_weight)
+        setMaxLength(
+          data.max_length === "0.00" &&
+            (e.target.value === "2" || e.target.value === "1")
+            ? ""
+            : data.max_length
+        )
+        setMaxWidth(
+          data.max_width === "0.00" &&
+            (e.target.value === "2" || e.target.value === "1")
+            ? ""
+            : data.max_width
+        )
+        setMaxHeight(
+          data.max_height === "0.00" &&
+            (e.target.value === "2" || e.target.value === "1")
+            ? ""
+            : data.max_height
+        )
+        setUpperDetails({ ...upperDetails, packaging_type: e.target.value })
+        setPackageDetails({
+          ...packageDetails,
+          length: data.max_length,
+          width: data.max_width,
+          height: data.max_height,
+        })
+      }
+      if (e.target.value === "2" || e.target.value === "1")
+        setIsCustomPackaging(true)
+      else setIsCustomPackaging(false)
+      if (e.target.value === "11") setAddActualWeight(true)
+      else setAddActualWeight(false)
+    })
   }
 
   const handleClear = () => {
@@ -666,7 +730,7 @@ function InternationalForm({
       totalcustoms = 0
     var newdata
     if (e.target.value === "add_item") {
-      if (validateItemDetails(item, setIsItemError)) {
+      if (validateItemDetails(item, commodities, setIsItemError)) {
         item["id"] = index + 1
         if (
           item.new_item_profile === "" ||
@@ -682,7 +746,7 @@ function InternationalForm({
       }
     }
     if (e.target.value === "edit_item") {
-      if (validateItemDetails(editItem, setIsItemError)) {
+      if (validateItemDetails(editItem, commodities, setIsItemError)) {
         newdata = [...data]
         const indexdata = data.findIndex((data) => data.id === itemID)
         newdata[indexdata].id = editItem.id
@@ -712,9 +776,145 @@ function InternationalForm({
       totalCustoms: totalcustoms,
     })
   }
+  //validate intl postal
+  async function IsValidPostal() {
+    const response = await validatePostal(
+      recipient.recipient_country,
+      recipient.recipient_postal,
+      recipient.recipient_state_code
+    )
+
+    if (response.error) {
+      if (Array.isArray(response.error.data.messages.errors)) {
+        toast.error(
+          response.error.data?.messages?.errors[0].code?.toUpperCase() +
+            ": " +
+            response.error.data?.messages?.errors[0].message.toUpperCase(),
+          { autoClose: 4000, hideProgressBar: true }
+        )
+      } else {
+        toast.error(response.error.data?.messages?.error.toUpperCase(), {
+          autoClose: 4000,
+          hideProgressBar: true,
+        })
+      }
+      setLoading(false)
+      return false
+    } else {
+      toast.success("RECIPIENT COUNTRY VALIDATIONS SUCCESSFUL!", {
+        autoClose: 2000,
+        hideProgressBar: true,
+      })
+      handlePackageValidation()
+    }
+  }
+
+  const handlePackageValidation = () => {
+    console.log("entered package validation")
+    if (
+      validatePackage(
+        upperDetails,
+        documentCustoms,
+        documentDesc,
+        documentType,
+        documentWeight,
+        maxWeight,
+        data,
+        commodities,
+        setIsPackageError
+      )
+    ) {
+      if (agree) {
+        // toast.success("REDIRECTING TO CONFIRMATION...", {
+        //   autoClose: 2000,
+        //   hideProgressBar: true,
+        // })
+        // setTimeout(() => {
+        //   navigation.next()
+        // }, 2000)
+        if (upperDetails["detail_type"] === "item") {
+          //console.log(data)
+          data.forEach((data) => {
+            for (let key in data) {
+              if (key != "id") {
+                if (
+                  data["new_item_profile"] === undefined ||
+                  data["new_item_profile"] === ""
+                ) {
+                  data["new_item_profile"] = "0"
+                }
+                sendDetails[`${key}_${packageNumber}_${count}`] = `${data[key]}`
+                //console.log(sendDetails);
+              }
+            }
+            count++
+          })
+          data.forEach((data) => {
+            item_weights += parseFloat(data.weight)
+            item_customs += parseFloat(data.customs_value)
+          })
+          packageDetails["total_package_content_1"] = data.length.toString()
+          packageDetails["total_customs_value_1"] = item_customs
+          upperDetails["total_weight"] = item_weights
+          packageDetails["weight_1"] = item_weights.toString()
+        } else {
+          sendDetails[`description_${packageNumber}_${packageNumber}`] =
+            documentDesc
+          sendDetails[`document_type_${packageNumber}_${packageNumber}`] =
+            documentType
+          sendDetails[`customs_value_${packageNumber}_${packageNumber}`] =
+            documentCustoms
+          upperDetails["purpose"] = ""
+          packageDetails["total_package_content_1"] = "1"
+          packageDetails["total_customs_value_1"] = documentCustoms
+          //   item_weights = parseFloat(maxWeight);
+
+          if (upperDetails.packaging_type === "11") {
+            upperDetails["total_weight"] = documentWeight
+            item_weights = documentWeight
+          } else {
+            item_weights = "0.5"
+            upperDetails["total_weight"] = item_weights
+          }
+        }
+        //   upperDetails["total_weight"] = parseFloat(upperDetails["total_weight"])+parseFloat(maxWeight) //to be transferred to add package button function
+
+        if (
+          parseFloat(item_weights) > parseFloat(maxWeight) &&
+          upperDetails.packaging_type !== "11"
+        ) {
+          setLoadingPackage(false)
+          toast.error("THE TOTAL UNIT OF ITEMS EXCEEDS THE PACKAGE WEIGHT.", {
+            autoClose: 4000,
+            hideProgressBar: true,
+          })
+          setLoading(false)
+        } else {
+          setLoadingPackage(true)
+
+          packageDetails["weight_1"] = item_weights.toString()
+          upperDetails["total_weight"] = upperDetails["total_weight"].toString()
+          navigation.next()
+          setLoading(false)
+          // _attemptcreateTransaction()
+        }
+        // _attemptcreateTransaction()
+      } else {
+        setLoading(false)
+        toast.error(
+          "PLEASE CHECK CAPTCHA AND AGREE TO THE TERMS AND CONDITIONS",
+          { autoClose: 2000, hideProgressBar: true }
+        )
+      }
+    } else {
+      setLoading(false)
+      setLoadingPackage(false)
+    }
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    setLoading(true)
     // if (captchaRef.current && !captcha ) {
     //     if (captchaRef.current.props.grecaptcha.getResponse().length !== 0) {
     //         setToken(captchaRef.current);
@@ -740,126 +940,34 @@ function InternationalForm({
           )
         ) {
           //POSTAL AWARE CONDITION HERE
-          // setIsClicked(true)
-          // if(postalAware)
-          // {
-          //     if(recipient.recipient_postal === ""){
-          //         setPostalValid(true)
-          //         setLoading(false);
-          //     }
-          //     else{
-          //         setPostalValid(false)
-          //         IsValidPostal()
-          //         setLoading(true);
-          //     }
-          // }
-          if (
-            validatePackage(
-              upperDetails,
-              documentCustoms,
-              documentDesc,
-              documentType,
-              documentWeight,
-              maxWeight,
-              data,
-              setIsPackageError
-            )
-          ) {
-            if (agree) {
-              toast.success("REDIRECTING TO CONFIRMATION...", {
-                autoClose: 2000,
-                hideProgressBar: true,
-              })
-              setTimeout(() => {
-                navigation.next()
-              }, 2000)
-              if (upperDetails["detail_type"] === "item") {
-                //console.log(data)
-                data.forEach((data) => {
-                  for (let key in data) {
-                    if (key != "id") {
-                      if (
-                        data["new_item_profile"] === undefined ||
-                        data["new_item_profile"] === ""
-                      ) {
-                        data["new_item_profile"] = "0"
-                      }
-                      sendDetails[
-                        `${key}_${packageNumber}_${count}`
-                      ] = `${data[key]}`
-                      //console.log(sendDetails);
-                    }
-                  }
-                  count++
-                })
-                data.forEach((data) => {
-                  item_weights += parseFloat(data.weight)
-                  item_customs += parseFloat(data.customs_value)
-                })
-                packageDetails["total_package_content_1"] =
-                  data.length.toString()
-                packageDetails["total_customs_value_1"] = item_customs
-                upperDetails["total_weight"] = item_weights
-                packageDetails["weight_1"] = item_weights.toString()
-              } else {
-                sendDetails[`description_${packageNumber}_${packageNumber}`] =
-                  documentDesc
-                sendDetails[`document_type_${packageNumber}_${packageNumber}`] =
-                  documentType
-                sendDetails[`customs_value_${packageNumber}_${packageNumber}`] =
-                  documentCustoms
-                upperDetails["purpose"] = ""
-                packageDetails["total_package_content_1"] = "1"
-                packageDetails["total_customs_value_1"] = documentCustoms
-                //   item_weights = parseFloat(maxWeight);
 
-                if (upperDetails.packaging_type === "11") {
-                  upperDetails["total_weight"] = documentWeight
-                  item_weights = documentWeight
-                } else {
-                  item_weights = "0.5"
-                  upperDetails["total_weight"] = item_weights
-                }
-              }
-              //   upperDetails["total_weight"] = parseFloat(upperDetails["total_weight"])+parseFloat(maxWeight) //to be transferred to add package button function
-
-              if (
-                parseFloat(item_weights) > parseFloat(maxWeight) &&
-                upperDetails.packaging_type !== "11"
-              ) {
-                setLoadingPackage(false)
-                //toast.error("THE TOTAL UNIT OF ITEMS EXCEEDS THE PACKAGE WEIGHT.",{ autoClose: 4000, hideProgressBar: true })
-              } else {
-                setLoadingPackage(true)
-
-                packageDetails["weight_1"] = item_weights.toString()
-                upperDetails["total_weight"] =
-                  upperDetails["total_weight"].toString()
-                // _attemptcreateTransaction()
-              }
-              _attemptcreateTransaction()
+          if (postalAware) {
+            if (recipient.recipient_postal === "") {
+              // setPostalValid(true)
+              setLoading(false)
             } else {
-              toast.error(
-                "PLEASE CHECK CAPTCHA AND AGREE TO THE TERMS AND CONDITIONS",
-                { autoClose: 2000, hideProgressBar: true }
-              )
+              // setPostalValid(false)
+              IsValidPostal()
+              setLoading(true)
             }
-          } else {
-            setLoadingPackage(false)
           }
         } //validatesender
       } else {
+        setLoading(false)
         toast.error("PLEASE PROVIDE RECIPIENT COMPANY OR NAME", {
           autoClose: 2000,
           hideProgressBar: true,
         })
       }
     } else {
+      setLoading(false)
       toast.error("PLEASE PROVIDE SENDER COMPANY OR NAME", {
         autoClose: 2000,
         hideProgressBar: true,
       })
     }
+
+    console.log("error list", isPackageError)
 
     // else{
     //     toast.error("PLEASE COMPLETE ALL REQUIRED FIELDS.");
@@ -1574,7 +1682,7 @@ function InternationalForm({
               PACKAGE DETAILS
             </h1>
             <div className="row mb-3">
-              <div className="col-4">
+              {/* <div className="col-4">
                 <div className="form-group border-grey">
                   <p className="input-subtitle">
                     Ship Date<span className="required-icon">*</span>
@@ -1584,38 +1692,44 @@ function InternationalForm({
                     name="ship_date"
                     onChange={(e) => handleChange(e)}
                     value={recipient.ship_date}
-                    // onChange={(e) =>
-                    //     setShipDate(Moment(e.target.value).format("YYYY-MM-DD"))
-                    // }
+                   
                     className="modal-input date-input reports-date form-control bg-grey"
-                    //value={shipdate}
+                   
                   />
-                  {/* onChange={(e)=>handleChange(e)} value={recipient.recipient_email} */}
                 </div>
-              </div>
-              <div className="col-4">
+              </div> */}
+              <div className="col-6">
                 <div className="form-group border-grey">
                   <p className="input-subtitle">
                     Ship Service<span className="required-icon">*</span>
                   </p>
-                  {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
-                  <select
-                    className="filter-dropdown form-control bg-grey"
-                    name="shipService"
-                    //onChange={(e) => handleFilterChange(e)}
-                    //value={upperDetails.service_type}
+                  <Form.Select
+                    size="md"
+                    className="bg-grey"
+                    name="service_type"
+                    value={upperDetails.service_type}
                     onChange={handleSelectChange}
                   >
-                    <option value="FEDEX_INTERNATIONAL_PRIORITY">
+                    <option
+                      defaultValue
+                      key="2"
+                      value="FEDEX_INTERNATIONAL_PRIORITY"
+                    >
                       FedEx International Priority®
                     </option>
-                    <option value="FEDEX_INTERNATIONAL_PRIORITY_EXPRESS">
-                      FedEx International Priority® Express
-                    </option>
-                  </select>
+                    {services.map((data) => {
+                      if (data.id != "2") {
+                        return (
+                          <option key={data.id} value={data.enumeration}>
+                            {data.name}
+                          </option>
+                        )
+                      }
+                    })}
+                  </Form.Select>
                 </div>
               </div>
-              <div className="col-4">
+              <div className="col-6">
                 <div className="form-group border-grey">
                   <p className="input-subtitle">
                     What are you sending?
@@ -1644,8 +1758,23 @@ function InternationalForm({
                     <p className="input-subtitle">
                       Package Type<span className="required-icon">*</span>
                     </p>
-                    {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
-                    <select
+                    <Form.Select
+                      size="md"
+                      className="bg-grey"
+                      name="packaging_type"
+                      value={upperDetails.packaging_type}
+                      onChange={handlePackageChange}
+                    >
+                      <option defaultValue>Select</option>
+                      {packages.map((data) => {
+                        return (
+                          <option key={data.id} value={data.id}>
+                            {data.name}
+                          </option>
+                        )
+                      })}
+                    </Form.Select>
+                    {/* <select
                       className="filter-dropdown form-control bg-grey"
                       name="packageType"
                       value={upperDetails.packaging_type}
@@ -1656,7 +1785,7 @@ function InternationalForm({
                       <option value="1">Custom</option>
                       <option value="2">Letter</option>
                       <option value="3">box</option>
-                    </select>
+                    </select> */}
                     <InputError
                       isValid={isPackageError.packaging_type}
                       message={"Package type is required*"}
@@ -1721,13 +1850,29 @@ function InternationalForm({
             <div className="row mb-4">
               {isDocument && (
                 <>
-                  <div className="col-4">
+                  <div className="col-6">
                     <div className="form-group border-grey">
                       <p className="input-subtitle">
                         Package Type<span className="required-icon">*</span>
                       </p>
+                      <Form.Select
+                        size="md"
+                        className="bg-grey"
+                        name="packaging_type"
+                        value={upperDetails.packaging_type}
+                        onChange={handlePackageChange}
+                      >
+                        <option defaultValue>Select</option>
+                        {packages.map((data) => {
+                          return (
+                            <option key={data.id} value={data.id}>
+                              {data.name}
+                            </option>
+                          )
+                        })}
+                      </Form.Select>
                       {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
-                      <select
+                      {/* <select
                         className="filter-dropdown form-control bg-grey"
                         name="packageType"
                         value={upperDetails.packaging_type}
@@ -1738,17 +1883,43 @@ function InternationalForm({
                         <option value="1">Custom</option>
                         <option value="2">Letter</option>
                         <option value="3">box</option>
-                      </select>
+                      </select> */}
                       <InputError
                         isValid={isPackageError.packaging_type}
                         message={"Package type is required*"}
                       />
                     </div>
                   </div>
+                  <div className="col-6">
+                    <div className="form-group border-grey">
+                      <p className="input-subtitle">
+                        Invoice for customs
+                        <span className="required-icon">*</span>
+                      </p>
+                      {/* <input type="text" className="form-control" id="country" aria-describedby="country"/> */}
+                      <select
+                        className="filter-dropdown form-control bg-grey"
+                        name="invoice"
+                        //value={upperDetails.customs_invoice}
+                        onChange={handleSelectChange}
+                        //onChange={(e) => handleFilterChange(e)}
+                      >
+                        <option value="pro_forma_invoice">
+                          I want FedEx to help me create a pro-forma invoice
+                        </option>
+                        <option value="own_invoice">
+                          I will create my own invoice
+                        </option>
+                        <option value="commercial_invoice">
+                          I want FedEx to help me create a commercial invoice
+                        </option>
+                      </select>
+                    </div>
+                  </div>
                 </>
               )}
 
-              <div className="col-4">
+              <div className="col-6 mt-3">
                 <div className="form-group">
                   <p className="input-subtitle">Dimensions</p>
                   <div className="input-group">
@@ -1805,7 +1976,7 @@ function InternationalForm({
                   </div>
                 </div>
               </div>
-              <div className="col-4">
+              <div className="col-6 mt-3">
                 <div className="form-group">
                   <p className="input-subtitle">
                     Max Weight<span className="required-icon">*</span>
@@ -1830,7 +2001,7 @@ function InternationalForm({
 
               {isItem && (
                 <>
-                  <div className="col-4 left mt-3">
+                  <div className="col-6 left mt-3">
                     <div className="form-group">
                       <input
                         type="checkbox"
@@ -1853,6 +2024,8 @@ function InternationalForm({
                         Purchase a higher limit of liability from FedEx
                       </label>
                     </div>
+                  </div>
+                  <div className="col-6 left mt-3">
                     <div className="form-group text-align-left left">
                       <input
                         type="checkbox"
@@ -1879,6 +2052,54 @@ function InternationalForm({
 
             {isDocument && (
               <>
+                <div className="row mb-4 mt-3">
+                  <div className="col-6 left mt-3">
+                    <div className="form-group">
+                      <input
+                        type="checkbox"
+                        className="custom-control-inpu mr-10 "
+                        id="purchase-limit"
+                        name="higher_limit_liability"
+                        checked={
+                          upperDetails.higher_limit_liability === "1"
+                            ? true
+                            : false
+                        }
+                        onChange={handleSelectChange}
+                      />
+                      {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
+                      {/* <p className='input'>Dimensions</p> */}
+                      <label
+                        className="custom-control-label input-subtitle pad-left5"
+                        htmlFor="purchase-limit"
+                      >
+                        Purchase a higher limit of liability from FedEx
+                      </label>
+                    </div>
+                  </div>
+                  <div className="col-6 left mt-3">
+                    <div className="form-group text-align-left left">
+                      <input
+                        type="checkbox"
+                        className="custom-control-inpu mr-10 text-align-left"
+                        id="signature-req"
+                        name="signature_required"
+                        checked={
+                          upperDetails.signature_required === "1" ? true : false
+                        }
+                        onChange={handleSelectChange}
+                      />
+                      {/* checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange} */}
+                      <label
+                        className="custom-control-label input-subtitle text-align-left pad-left5"
+                        htmlFor="signature-req"
+                      >
+                        Require Signature
+                      </label>
+                    </div>
+                  </div>
+                  <div className="col-4 left mt-3"></div>
+                </div>
                 <div className="row mb-4 mt-3">
                   <div className="col-4">
                     <div className="form-group border-grey">
@@ -1927,6 +2148,10 @@ function InternationalForm({
                         isValid={isPackageError.documentDesc}
                         message={"Document description is required*"}
                       />
+                      <InputError
+                        isValid={isPackageError.documentDesc_comm_error}
+                        message={"Invalid Description*"}
+                      />
                     </div>
                   </div>
                   <div className="col-4 ">
@@ -1948,55 +2173,6 @@ function InternationalForm({
                       />
                     </div>
                   </div>
-                </div>
-
-                <div className="row mb-4 mt-3">
-                  <div className="col-4 left mt-3">
-                    <div className="form-group">
-                      <input
-                        type="checkbox"
-                        className="custom-control-inpu mr-10 "
-                        id="purchase-limit"
-                        name="higher_limit_liability"
-                        checked={
-                          upperDetails.higher_limit_liability === "1"
-                            ? true
-                            : false
-                        }
-                        onChange={handleSelectChange}
-                      />
-                      {/* checked={upperDetails.higher_limit_liability === "1"? true:false} onChange={handleSelectChange} */}
-                      {/* <p className='input'>Dimensions</p> */}
-                      <label
-                        className="custom-control-label input-subtitle pad-left5"
-                        htmlFor="purchase-limit"
-                      >
-                        Purchase a higher limit of liability from FedEx
-                      </label>
-                    </div>
-                  </div>
-                  <div className="col-4 left mt-3">
-                    <div className="form-group text-align-left left">
-                      <input
-                        type="checkbox"
-                        className="custom-control-inpu mr-10 text-align-left"
-                        id="signature-req"
-                        name="signature_required"
-                        checked={
-                          upperDetails.signature_required === "1" ? true : false
-                        }
-                        onChange={handleSelectChange}
-                      />
-                      {/* checked={upperDetails.signature_required === "1"? true:false} onChange={handleSelectChange} */}
-                      <label
-                        className="custom-control-label input-subtitle text-align-left pad-left5"
-                        htmlFor="signature-req"
-                      >
-                        Require Signature
-                      </label>
-                    </div>
-                  </div>
-                  <div className="col-4 left mt-3"></div>
                 </div>
               </>
             )}
@@ -2159,7 +2335,7 @@ function InternationalForm({
                     I agree to the{" "}
                   </label>
                   <a> </a>
-                  <a className="pink-text">Terms and conditions</a>
+                  <a className="pink-text">Terms and Conditions</a>
                 </div>
               </div>
 
@@ -2180,15 +2356,31 @@ function InternationalForm({
                     </button>
                   </div>
                   <div className="col-3">
-                    <button
-                      className="btn-blue btn-rad right"
-                      data-bs-toggle="modal"
-                      data-bs-target="#exampleModal"
-                      onClick={handleSubmit}
-                    >
-                      {" "}
-                      Next{" "}
-                    </button>
+                    {loading ? (
+                      <button
+                        className="btn-blue btn-rad"
+                        data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        style={{ textAlign: "-webkit-center" }}
+                      >
+                        <ReactLoading
+                          type="balls"
+                          color="#FFFFFF"
+                          height={20}
+                          width={25}
+                        />
+                      </button>
+                    ) : (
+                      <button
+                        className="btn-blue btn-rad right"
+                        data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        onClick={handleSubmit}
+                      >
+                        {" "}
+                        Next{" "}
+                      </button>
+                    )}
                   </div>
                   {/* onClick={openModal} */}
                 </div>
@@ -2274,6 +2466,10 @@ function InternationalForm({
                     <InputError
                       isValid={isItemError.description}
                       message={"Description is required*"}
+                    />
+                    <InputError
+                      isValid={isItemError.description_comm_error}
+                      message={"Invalid Description"}
                     />
                   </div>
                 </div>
@@ -2579,6 +2775,10 @@ function InternationalForm({
                     <InputError
                       isValid={isItemError.description}
                       message={"Description is required*"}
+                    />
+                    <InputError
+                      isValid={isItemError.description_comm_error}
+                      message={"Invalid Description"}
                     />
                   </div>
                 </div>
