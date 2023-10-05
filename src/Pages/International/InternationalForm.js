@@ -952,6 +952,9 @@ function InternationalForm({
             }
           }
         } //validatesender
+        else{
+          setLoading(false)
+        }
       } else {
         setLoading(false)
         toast.error("PLEASE PROVIDE RECIPIENT COMPANY OR NAME", {
