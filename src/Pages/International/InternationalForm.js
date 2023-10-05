@@ -1382,7 +1382,7 @@ function InternationalForm({
                       </span>
                     </div>
                     <input
-                      type="number"
+                      type="text"
                       onWheel={() => document.activeElement.blur()}
                       name="sender_contact_no"
                       className="form-control input-subtitle"
@@ -1396,6 +1396,13 @@ function InternationalForm({
                       }
                       required
                       value={sender.sender_contact_no}
+                      onKeyPress={(event) => {
+                    if (!/[0-9]/.test(event.key)) {
+                      event.preventDefault();
+                    }
+                  }}
+                  maxLength={11}
+                  
                     />
                     {/* onChange={(e)=>setSender({...sender, [e.target.name]: e.target.value})} required value={sender.sender_contact_no} */}
                   </div>
