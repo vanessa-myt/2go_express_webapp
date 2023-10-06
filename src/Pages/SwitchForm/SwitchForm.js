@@ -16,6 +16,7 @@ import {
 } from "../../Helpers/ApiCalls/DropdownsApi"
 import BookingSuccess from "../BookingSuccess/BookingSuccess"
 import Dashboard from "../Dashboard/Dashboard"
+import TimelineComponent from "../Timeline/TimelineComponent"
 
 function SwitchForm() {
   const date = formatYMD(getTodayDate())
@@ -476,7 +477,7 @@ function SwitchForm() {
   }, [])
   switch (step.id) {
     case "dashboard":
-      return <Dashboard {...dashboardProps}/>
+      return <TimelineComponent {...dashboardProps}/>
     case "international":
       return <InternationalForm {...internationalProps} />
     case "summary":

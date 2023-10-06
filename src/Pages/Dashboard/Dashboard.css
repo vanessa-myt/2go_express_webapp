@@ -1,10 +1,16 @@
-.purple-label{
-    color:var(--purple);
-    font-size: larger;
+.purple-label {
+  color: var(--purple);
+  font-size: larger;
 }
 
-.card-col{
-    background:var(--pastel-blue);
-    padding: 2rem;
-    border-radius: 15px;
+.card-col {
+  background: var(--pastel-blue);
+  padding: 2rem;
+  border-radius: 15px;
+}
+
+.timeline-div {
+  background: var(--pastel-blue);
+  padding: 2rem;
+  border-radius: 15px;
 }
