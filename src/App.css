@@ -4,6 +4,8 @@
   --secondary-color: #2a96c6;
   --tertiary-color: #c90f75;
   --dropdown-bg: #ecf2f4;
+  --purple: #603D77;
+  --pastel-blue:#DCF6FC;
 
   --main-text-color: #31302f;
 
@@ -17,6 +19,7 @@
 
 .App {
   text-align: center;
+  font-family: var(--font-bold);
 }
 
 .page {
