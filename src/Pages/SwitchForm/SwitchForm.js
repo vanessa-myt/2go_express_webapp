@@ -15,6 +15,7 @@ import {
   fetchServices,
 } from "../../Helpers/ApiCalls/DropdownsApi"
 import BookingSuccess from "../BookingSuccess/BookingSuccess"
+import Dashboard from "../Dashboard/Dashboard"
 
 function SwitchForm() {
   const date = formatYMD(getTodayDate())
@@ -59,11 +60,7 @@ function SwitchForm() {
   }
 
   const steps = [
-    // {id: "sender"},
-    // {id: "recipient"},
-    // {id: "packages"},
-    // {id: "summary"},
-    // {id: "payment"},
+   {id: "dashboard"},
     { id: "international" },
     { id: "summary" },
     {id: "success"}
@@ -419,6 +416,7 @@ function SwitchForm() {
     setCaptcha,
   }
 
+  const dashboardProps = {navigation}
   const successProps = {navigation, transactionDetails, generalDetails}
 
   async function getCountries() {
@@ -477,6 +475,8 @@ function SwitchForm() {
     getCommodities()
   }, [])
   switch (step.id) {
+    case "dashboard":
+      return <Dashboard {...dashboardProps}/>
     case "international":
       return <InternationalForm {...internationalProps} />
     case "summary":
