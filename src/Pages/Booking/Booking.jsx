@@ -1,11 +1,15 @@
 import { ToastContainer } from "react-toastify"
 import Navbar from "../../Components/Navbar/Navbar"
-import { Button, Modal } from "antd"
+import { Button } from "antd"
 import "./Package.css"
 import ReactLoading from "react-loading"
 import { qair_comms } from "../../Assets/Commodities/QAirComms"
 import { zip_comms } from "../../Assets/Commodities/ZipComms"
 import { Typeahead } from "react-bootstrap-typeahead"
+import { useState } from "react"
+import { searchAreas } from "../../Helpers/ApiCalls/expressAPI"
+import erroricon from "../../Assets/Modals/erroricon.png"
+import { Modal } from "react-bootstrap"
 
 export default function Booking({
   navigation,
@@ -77,7 +81,12 @@ export default function Booking({
   setHasDropoff,
   setAWb,
 }) {
+  /* Variables */
+  const [openOsa, setOpenOsa] = useState(false)
+  const [openOtd, setOpenOtd] = useState(false)
+
   /* Handlers */
+
   //specify package details based on chosen transaction type
   function handleTransactionTypeChange(type) {
     setPackageCodes([])
@@ -208,6 +217,266 @@ export default function Booking({
       })
     } else {
       setGeneralDetailsExpress({ ...generalDetailsExpress, [name]: value })
+    }
+  }
+
+  //search address
+  async function fetchAreas(name, type, e) {
+    if (name === "shipper_province") {
+      setSelectedShipperCity([])
+      setSelectedShipperBrgy([])
+      generalDetailsExpress["shipper_province"] = e[0].name
+      generalDetailsExpress["shipper_postal"] = ""
+      generalDetailsExpress["shipper_brgy"] = ""
+      generalDetailsExpress["shipper_city"] = ""
+    }
+    if (name === "consignee_province") {
+      setSelectedConsigneeCity([])
+      setSelectedConsigneeBrgy([])
+      generalDetailsExpress["consignee_province"] = e[0].name
+      generalDetailsExpress["consignee_postal"] = ""
+      generalDetailsExpress["consignee_brgy"] = ""
+      generalDetailsExpress["consignee_city"] = ""
+      generalDetailsExpress["consignee_origin"] = ""
+      generalDetailsExpress["consignee_area_code"] = ""
+      // setGeneralDetailsExpress({
+      //   ...generalDetailsExpress,
+      //   consignee_postal: "",
+      //   consignee_brgy: "",
+      //   consignee_city: "",
+      //   consignee_origin: "",
+      //   consignee_area_code: "",
+      // });
+    }
+    const response = await searchAreas(generalDetailsExpress, type)
+    if (response.data) {
+      if (type === "shipper") {
+        var arr = []
+        response.data.map((data) => {
+          arr.push({ name: data.municipality })
+        })
+
+        setShipperCities(arr)
+      }
+      if (type === "consignee") {
+        var arr = []
+        response.data.map((data) => {
+          arr.push({ name: data.municipality })
+        })
+        setConsigneeCities(arr)
+      }
+    }
+  }
+
+  //shipper address event handlers
+  async function fetchShipperBrgy(e) {
+    generalDetailsExpress["shipper_postal"] = ""
+    generalDetailsExpress["shipper_brgy"] = ""
+    generalDetailsExpress["shipper_city"] = e[0]?.name
+    setSelectedShipperBrgy([])
+    const response = await searchAreas(generalDetailsExpress, "shipper")
+
+    if (response.data) {
+      var arr = []
+      response.data.map((data) => {
+        arr.push({ ...data, name: data.barangay })
+      })
+      setShipperBrgy(arr)
+    }
+  }
+
+  function fetchShipperCodes(e) {
+    setGeneralDetailsExpress({
+      ...generalDetailsExpress,
+      shipper_brgy: e[0].name,
+      shipper_postal: e[0].zip_code,
+      shipper_origin: e[0].port_code,
+      shipper_area_code: e[0].area_code,
+    })
+  }
+
+  function handleShipperProvinceChange(e) {
+    setSelectedShipperProvince(e)
+
+    if (e.length > 0) {
+      if (e[0].delivery_category === "OSA") {
+        setOpenOsa(true)
+      } else {
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          shipper_province: e[0].name,
+        })
+        fetchAreas("shipper_province", "shipper", e)
+      }
+    }
+  }
+
+  function handleShipperProvinceInputChange(e) {
+    setSelectedShipperCity([])
+    setSelectedShipperBrgy([])
+
+    setGeneralDetailsExpress({
+      ...generalDetailsExpress,
+      shipper_postal: "",
+      shipper_city: "",
+      shipper_brgy: "",
+    })
+  }
+
+  function handleShipperCityChange(e) {
+    setSelectedShipperCity(e)
+    if (e.length > 0) {
+      if (e[0].delivery_category === "OSA") {
+        setOpenOsa(true)
+      } else {
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          shipper_city: e[0].name,
+        })
+        generalDetailsExpress["shipper_postal"] = ""
+        generalDetailsExpress["shipper_brgy"] = ""
+        fetchShipperBrgy(e)
+      }
+    }
+  }
+
+  function handleShipperCityInputChange(e) {
+    setSelectedShipperBrgy([])
+
+    setGeneralDetailsExpress({
+      ...generalDetailsExpress,
+      shipper_postal: "",
+      shipper_brgy: "",
+    })
+  }
+
+  function handleShipperBrgyChange(e) {
+    setSelectedShipperBrgy(e)
+    if (e.length > 0) {
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        shipper_delivery_category: e[0].delivery_category,
+      })
+      // if (e[0].delivery_category === "OTD") {
+      //   setOpenOtd(true);
+      // }
+
+      if (e[0].delivery_category === "OSA") {
+        setOpenOsa(true)
+      } else {
+        fetchShipperCodes(e)
+      }
+    }
+  }
+
+  //consignee event handlers
+  async function fetchConsigneeBrgy(e) {
+    generalDetailsExpress["consignee_postal"] = ""
+    generalDetailsExpress["consignee_brgy"] = ""
+    generalDetailsExpress["consignee_origin"] = ""
+    generalDetailsExpress["consignee_area_code"] = ""
+    setSelectedConsigneeBrgy([])
+    generalDetailsExpress["consignee_city"] = e[0].name
+    const response = await searchAreas(generalDetailsExpress, "consignee")
+    if (response.data) {
+      var arr = []
+      response.data.map((data) => {
+        arr.push({ ...data, name: data.barangay })
+      })
+      setConsigneeBrgy(arr)
+    }
+  }
+
+  function fetchConsigneeCodes(e) {
+    setGeneralDetailsExpress({
+      ...generalDetailsExpress,
+      consignee_brgy: e[0].name,
+      consignee_postal: e[0].zip_code,
+      consignee_origin: e[0].port_code,
+      consignee_area_code: e[0].area_code,
+      consignee_delivery_category: e[0].delivery_category,
+    })
+  }
+
+  function handleConsigneeProvinceChange(e) {
+    setSelectedConsigneeProvince(e)
+    if (e.length > 0) {
+      if (e[0].delivery_category === "OSA") {
+        setOpenOsa(true)
+      } else {
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          consignee_province: e[0].name,
+        })
+        fetchAreas("consignee_province", "consignee", e)
+      }
+    }
+  }
+
+  function handleConsigneeProvinceInputChange(e) {
+    setSelectedConsigneeCity([])
+    setSelectedConsigneeBrgy([])
+
+    setGeneralDetailsExpress({
+      ...generalDetailsExpress,
+      consignee_postal: "",
+      consignee_city: "",
+      consignee_brgy: "",
+      consignee_area_code: "",
+      consignee_origin: "",
+    })
+  }
+
+  function handleConsigneeCityChange(e) {
+    setSelectedConsigneeCity(e)
+    if (e.length > 0) {
+      if (e[0].delivery_category === "OSA") {
+        setOpenOsa(true)
+      } else {
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          consignee_city: e[0].name,
+        })
+        fetchConsigneeBrgy(e)
+      }
+    }
+  }
+
+  function handleConsigneeCityInputChange(e) {
+    setSelectedConsigneeBrgy([])
+
+    setGeneralDetailsExpress({
+      ...generalDetailsExpress,
+      consignee_postal: "",
+      consignee_brgy: "",
+      consignee_area_code: "",
+      consignee_origin: "",
+    })
+  }
+
+  function handleConsigneeBrgyChange(e) {
+    setSelectedConsigneeBrgy(e)
+    if (e.length > 0) {
+      if (e[0].delivery_category === "OSA") {
+        setOpenOsa(true)
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          consignee_delivery_category: "OSA",
+        })
+        setSelectedConsigneeBrgy([])
+      } else {
+        // if (e[0].delivery_category === "OTD") {
+        //   setOpenOtd(true);
+        // } else {
+        //   setOpen(false);
+        // }
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          consignee_delivery_category: "",
+        })
+        generalDetailsExpress["consignee_delivery_category"] = ""
+        fetchConsigneeCodes(e)
+      }
     }
   }
 
@@ -732,8 +1001,8 @@ export default function Booking({
                     className="pt-0"
                     id="basic-typeahead-single"
                     labelKey="name"
-                    //   onChange={handleShipperProvinceChange}
-                    //   onInputChange={handleShipperProvinceInputChange}
+                    onChange={handleShipperProvinceChange}
+                    onInputChange={handleShipperProvinceInputChange}
                     options={shipperProvince}
                     placeholder="Province"
                     selected={selectedShipperProvince}
@@ -743,20 +1012,6 @@ export default function Booking({
                 isValid={isError.shipper_province}
                 message={"This field is required*"}
               /> */}
-                {/* <span className="input-group input-group-sm">
-            <input
-            autoComplete="new-password"
-            list="autocompleteOff"
-              name="shipper_province"
-              value={generalDetailsExpress.shipper_province}
-              type="text"
-              className="form-control input-font-sm"
-              aria-label="ecust-acct"
-              aria-describedby="basic-addon1"
-              placeholder="Province"
-              onChange={(e) => fetchAreas(e, "shipper")}
-            />
-          </span> */}
               </div>
               <div className="col-3">
                 <span>
@@ -771,8 +1026,8 @@ export default function Booking({
                     labelKey="name"
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    //   onChange={handleShipperCityChange}
-                    //   onInputChange={handleShipperCityInputChange}
+                    onChange={handleShipperCityChange}
+                    onInputChange={handleShipperCityInputChange}
                     options={shipperCities}
                     placeholder="City/Municipality"
                     selected={selectedShipperCity}
@@ -782,21 +1037,6 @@ export default function Booking({
                 isValid={isError.shipper_city}
                 message={"This field is required*"}
               /> */}
-                {/* <span className="input-group input-group-sm">
-            <input
-            autoComplete="new-password"
-            list="autocompleteOff"
-              name="shipper_city"
-              value={generalDetailsExpress.shipper_city}
-              type="text"
-              className="form-control input-font-sm"
-              aria-label="ecust-acct"
-              aria-describedby="basic-addon1"
-              placeholder="City"
-              onChange={(e) => fetchAreas(e, "shipper")}
-              // onChange={handleDetailChange}
-            />
-          </span> */}
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -816,7 +1056,7 @@ export default function Booking({
                     className="pt-0"
                     id="basic-typeahead-single"
                     labelKey="name"
-                    //   onChange={handleShipperBrgyChange}
+                    onChange={handleShipperBrgyChange}
                     options={shipperBrgy}
                     placeholder="Barangay"
                     selected={selectedShipperBrgy}
@@ -826,38 +1066,9 @@ export default function Booking({
                 isValid={isError.shipper_brgy}
                 message={"This field is required*"}
               /> */}
-                {/* <span className="input-group input-group-sm">
-            <input
-            autoComplete="new-password"
-            list="autocompleteOff"
-              name="shipper_brgy"
-              value={generalDetailsExpress.shipper_brgy}
-              type="text"
-              className="form-control input-font-sm"
-              aria-label="ecust-acct"
-              aria-describedby="basic-addon1"
-              placeholder="Barangay"
-              onChange={(e) => fetchAreas(e, "shipper")}
-              // onChange={handleDetailChange}
-            />
-          </span> */}
               </div>
               <div className="col-sm-3">
                 <span className="input-group input-group-sm">
-                  {/* <span>
-              <Typeahead
-              inputProps={{ autoComplete: "ofnew-password}, list:"autoComplete"}
-                size="sm"
-                className="pt-0"
-                id="basic-typeahead-single"
-                labelKey="name"
-                onChange={setSelectedOutlet}
-                options={outlets}
-                placeholder="Choose outlet"
-                selected={selectedOutlet}
-              />
-            </span> */}
-
                   <input
                     autoComplete="new-password"
                     list="autocompleteOff"
@@ -950,7 +1161,7 @@ export default function Booking({
                     autoComplete="new-password"
                     list="autocompleteOff"
                     name="shipper_origin"
-                    //   value={getBranchPort()}
+                    value={generalDetailsExpress.shipper_origin}
                     type="text"
                     className="form-control input-font-sm"
                     aria-label="ecust-acct"
@@ -967,7 +1178,7 @@ export default function Booking({
                     list="autocompleteOff"
                     onChange={handleDetailChange}
                     name="shipper_area_code"
-                    //   value={getBranchAreaCode()}
+                    value={generalDetailsExpress.shipper_area_code}
                     type="text"
                     className="form-control input-font-sm"
                     aria-label="ecust-acct"
@@ -1161,8 +1372,8 @@ export default function Booking({
                     className="pt-0"
                     id="basic-typeahead-single"
                     labelKey="name"
-                    //   onChange={handleConsigneeProvinceChange}
-                    //   onInputChange={handleConsigneeProvinceInputChange}
+                    onChange={handleConsigneeProvinceChange}
+                    onInputChange={handleConsigneeProvinceInputChange}
                     options={consigneeProvince}
                     placeholder="Province"
                     selected={selectedConsigneeProvince}
@@ -1172,19 +1383,6 @@ export default function Booking({
                 isValid={isError.consignee_province}
                 message={"This field is required*"}
               /> */}
-                {/* <input
-          autoComplete="new-password"
-          list="autocompleteOff"
-              name="consignee_province"
-              value={generalDetailsExpress.consignee_province}
-              type="text"
-              className="form-control input-font-sm"
-              aria-label="ecust-acct"
-              aria-describedby="basic-addon1"
-              placeholder="Province"
-              onChange={(e) => fetchAreas(e, "consignee")}
-            />
-          </span> */}
               </div>
               <div className="col-3">
                 <span>
@@ -1199,8 +1397,8 @@ export default function Booking({
                     className="pt-0"
                     id="basic-typeahead-single"
                     labelKey="name"
-                    //   onChange={handleConsigneeCityChange}
-                    //   onInputChange={handleConsigneeCityInputChange}
+                    onChange={handleConsigneeCityChange}
+                    onInputChange={handleConsigneeCityInputChange}
                     options={consigneeCities}
                     placeholder="City/Municipality"
                     selected={selectedConsigneeCity}
@@ -1210,20 +1408,6 @@ export default function Booking({
                 isValid={isError.consignee_city}
                 message={"This field is required*"}
               /> */}
-                {/* <span className="input-group input-group-sm">
-            <input
-            autoComplete="new-password"
-            list="autocompleteOff"
-              name="consignee_city"
-              value={generalDetailsExpress.consignee_city}
-              type="text"
-              className="form-control input-font-sm"
-              aria-label="ecust-acct"
-              aria-describedby="basic-addon1"
-              placeholder="City"
-              onChange={(e) => fetchAreas(e, "consignee")}
-            />
-          </span> */}
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1237,7 +1421,6 @@ export default function Booking({
                       autoComplete: "new-password",
                       list: "autoComplete",
                     }}
-                    // open={open}
                     autoComplete="new-password"
                     list="autocompleteOff"
                     size="sm"
@@ -1253,7 +1436,7 @@ export default function Booking({
                     //   setFocused(false);
                     //   // setOpen(open);
                     // }}
-                    //   onChange={handleConsigneeBrgyChange}
+                    onChange={handleConsigneeBrgyChange}
                     options={consigneeBrgy}
                     placeholder="Barangay"
                     selected={selectedConsigneeBrgy}
@@ -1263,20 +1446,6 @@ export default function Booking({
                 isValid={isError.consignee_brgy}
                 message={"This field is required*"}
               /> */}
-                {/* <span className="input-group input-group-sm">
-            <input
-            autoComplete="new-password"
-            list="autocompleteOff"
-              name="consignee_brgy"
-              value={generalDetailsExpress.consignee_brgy}
-              type="text"
-              className="form-control input-font-sm"
-              aria-label="ecust-acct"
-              aria-describedby="basic-addon1"
-              placeholder="Barangay"
-              onChange={(e) => fetchAreas(e, "consignee")}
-            />
-          </span> */}
               </div>
               <div className="col-sm-3">
                 <span className="input-group input-group-sm">
@@ -1443,8 +1612,8 @@ export default function Booking({
               </div>
             </div>
             <Modal
-              // show={openOsa}
-              // onHide={() => setOpenOsa(false)}
+              show={openOsa}
+              onHide={() => setOpenOsa(false)}
               size="md"
               backdrop="static"
               centered
@@ -1455,7 +1624,7 @@ export default function Booking({
                     className="col-sm-4 align-center"
                     style={{ textAlignLast: "end" }}
                   >
-                    {/* <img src={erroricon} width={100} height={100} /> */}
+                    <img src={erroricon} width={100} height={100} />
                   </div>
                   <div
                     className="col-sm-8 align-left pt-2 fw-bold"
@@ -1473,7 +1642,7 @@ export default function Booking({
                         background: "var(--cancel-btn)",
                         border: "none",
                       }}
-                      // onClick={() => setOpenOsa(false)}
+                      onClick={() => setOpenOsa(false)}
                     >
                       Close
                     </Button>
@@ -1492,8 +1661,8 @@ export default function Booking({
               </Modal.Body>
             </Modal>
             <Modal
-              // show={openOtd}
-              // onHide={() => setOpenOsa(false)}
+              show={openOtd}
+              onHide={() => setOpenOsa(false)}
               size="md"
               backdrop="static"
               centered
@@ -1504,6 +1673,7 @@ export default function Booking({
                     className="col-sm-4 align-center"
                     style={{ textAlignLast: "end" }}
                   >
+                    Hello
                     {/* <img src={caution} width={100} height={100} /> */}
                   </div>
                   <div
@@ -1540,153 +1710,6 @@ export default function Booking({
                       }}
                     >
                       Proceed
-                    </Button>
-                  </div>
-                </div>
-                <div className="row justify-content-center">
-                  <div
-                    className="col-sm-8 align-left pt-4 mt-2 fw-bold"
-                    style={{
-                      textAlign: "left",
-                      fontSize: "large",
-                      color: "var(--cancel-btn)",
-                    }}
-                  ></div>
-                </div>
-              </Modal.Body>
-            </Modal>
-            {/* Not allowed to dropoff prompt */}
-            <Modal
-              // show={showUnallowedModal}
-              // onHide={() => setShowUnallowedModal(false)}
-              size="md"
-              backdrop="static"
-              centered
-            >
-              <Modal.Body className="pt-5">
-                <div className="row justify-content-center">
-                  <div
-                    className="col-sm-4 align-center"
-                    style={{ textAlignLast: "end" }}
-                  >
-                    {/* <img src={erroricon} width={100} height={100} /> */}
-                  </div>
-                  <div
-                    className="col-sm-8 align-left pt-2 fw-bold"
-                    style={{ textAlign: "center" }}
-                  >
-                    <span style={{ textAlign: "left", fontSize: "large" }}>
-                      Selected account is not allowed to drop-off.
-                    </span>
-                    <br />
-                    <Button
-                      size="sm"
-                      style={{
-                        textAlign: "center",
-                        background: "var(--cancel-btn)",
-                        border: "none",
-                      }}
-                      // onClick={() => setShowUnallowedModal(false)}
-                    >
-                      Close
-                    </Button>
-                  </div>
-                </div>
-                <div className="row justify-content-center">
-                  <div
-                    className="col-sm-8 align-left pt-4 mt-2 fw-bold"
-                    style={{
-                      textAlign: "left",
-                      fontSize: "large",
-                      color: "var(--cancel-btn)",
-                    }}
-                  ></div>
-                </div>
-              </Modal.Body>
-            </Modal>
-            <Modal
-              // show={showExceed}
-              // onHide={() => setShowExceed(false)}
-              size="md"
-              backdrop="static"
-              centered
-            >
-              <Modal.Body className="pt-5">
-                <div className="row justify-content-center">
-                  <div
-                    className="col-sm-4 align-center"
-                    style={{ textAlignLast: "end" }}
-                  >
-                    {/* <img src={erroricon} width={100} height={100} /> */}
-                  </div>
-                  <div
-                    className="col-sm-8 align-left pt-4 mt-2 fw-bold"
-                    style={{ textAlign: "center" }}
-                  >
-                    <span style={{ textAlign: "left", fontSize: "large" }}>
-                      Please select image not exceeding 4MB!
-                    </span>
-                    <br />
-                    <Button
-                      size="sm"
-                      style={{
-                        textAlign: "center",
-                        background: "var(--cancel-btn)",
-                        border: "none",
-                      }}
-                      // onClick={() => setShowExceed(false)}
-                    >
-                      Close
-                    </Button>
-                  </div>
-                </div>
-                <div className="row justify-content-center">
-                  <div
-                    className="col-sm-8 align-left pt-4 mt-2 fw-bold"
-                    style={{
-                      textAlign: "left",
-                      fontSize: "large",
-                      color: "var(--cancel-btn)",
-                    }}
-                  ></div>
-                </div>
-              </Modal.Body>
-            </Modal>
-            <Modal
-              // show={showMaximum}
-              // onHide={() => setShowMaximum(false)}
-              size="md"
-              centered
-            >
-              {/* <Modal.Header closeButton>
-            <Modal.Title>Modal heading</Modal.Title>
-            </Modal.Header> */}
-              <Modal.Body className="pt-5">
-                <div className="row justify-content-center">
-                  <div
-                    className="col-sm-4 align-center"
-                    style={{ textAlignLast: "end" }}
-                  >
-                    {/* <img src={erroricon} width={100} height={100} /> */}
-                  </div>
-                  <div
-                    className="col-sm-8 align-left pt-3 fw-bold"
-                    style={{ textAlign: "center" }}
-                  >
-                    <span style={{ textAlign: "left", fontSize: "large" }}>
-                      You can only attach a maximum of 3 images!
-                    </span>
-                    <br />
-                    <Button
-                      size="sm"
-                      style={{
-                        textAlign: "center",
-                        background: "var(--cancel-btn)",
-                        border: "none",
-                      }}
-                      // onClick={() => setShowMaximum(false)}
-                    >
-                      Close
                     </Button>
                   </div>
                 </div>
