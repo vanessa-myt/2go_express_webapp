@@ -18,6 +18,7 @@ import BookingSuccess from "../BookingSuccess/BookingSuccess"
 import Dashboard from "../Dashboard/Dashboard"
 import TimelineComponent from "../Timeline/TimelineComponent"
 import Booking from "../Booking/Booking"
+import { searchAreasDef } from "../../Helpers/ApiCalls/expressAPI"
 
 function SwitchForm() {
   const steps = [{ id: "dashboard" }, { id: "booking" }, { id: "track" }]
@@ -980,40 +981,35 @@ function SwitchForm() {
     setSelectedCommodity,
   }
 
+  //get 2go areas list
   async function fetchAreas() {
-    // const response = await searchAreasDef();
-    // if (response.data) {
-    //   var arr = [];
-    //   response.data.map((data) => {
-    //     arr.push({ ...data, name: data.province });
-    //   });
-    //   setShipperProvince(arr);
-    // }
-  }
-  async function fetchAreasConsignee() {
-    // const response = await searchAreasDef();
-    // if (response.data) {
-    //   var arr = [];
-    //   response.data.map((data) => {
-    //     arr.push({ ...data, name: data.province });
-    //   });
-    //   // setShipperProvince(arr);
-    //   setConsigneeProvince(arr);
-    // }
+    const response = await searchAreasDef()
+    if (response.data) {
+      var arr = []
+      response.data.map((data) => {
+        arr.push({ ...data, name: data.province })
+      })
+      setShipperProvince(arr)
+    }
   }
 
-  async function fetchOutlets() {
-    // const response = await getPickupOutlets()
-    // if(response.data){
-    //   setPickupOutlets(response.data)
-    // }
+  async function fetchAreasConsignee() {
+    const response = await searchAreasDef()
+    if (response.data) {
+      var arr = []
+      response.data.map((data) => {
+        arr.push({ ...data, name: data.province })
+      })
+
+      setConsigneeProvince(arr)
+    }
   }
+
   useEffect(() => {
     fetchAreas()
     fetchAreasConsignee()
-
-    fetchOutlets()
   }, [])
+
   switch (step.id) {
     case "dashboard":
       return <Dashboard {...packageProps} />
