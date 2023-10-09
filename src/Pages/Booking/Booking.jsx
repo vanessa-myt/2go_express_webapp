@@ -3,7 +3,8 @@ import Navbar from "../../Components/Navbar/Navbar"
 import { Button, Modal } from "antd"
 import "./Package.css"
 import ReactLoading from "react-loading"
-import search from "../../Assets/Sender/search_icon.png"
+import { qair_comms } from "../../Assets/Commodities/QAirComms"
+import { zip_comms } from "../../Assets/Commodities/ZipComms"
 import { Typeahead } from "react-bootstrap-typeahead"
 
 export default function Booking({
@@ -76,6 +77,72 @@ export default function Booking({
   setHasDropoff,
   setAWb,
 }) {
+  //Handlers
+
+  //specify package details based on chosen transaction type
+  function handleTransactionTypeChange(type) {
+    setPackageCodes([])
+    if (type === "document") {
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        total_package_weight: 0,
+        transaction_type: "document",
+        packaging: "",
+        declared_value: "0",
+        payor:
+          generalDetailsExpress.destination_system === "QAIR"
+            ? "shipper"
+            : generalDetailsExpress.payor,
+      })
+      setDocuClicked(true)
+      setParcelClicked(false)
+      var arr = []
+      arr.push({
+        description: "",
+        package_code: " ",
+        commodity_code: qair_comms.filter((data) => data.code === "DOC"),
+        actual_weight: "",
+        length: "",
+        height: "",
+        width: "",
+        block_measurement: "0",
+        quantity: "1",
+        port_sticker_numbers: [],
+      })
+      setDocumentDetails(arr)
+    }
+    if (type === "parcel") {
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        total_package_weight: 0,
+        transaction_type: "parcel",
+        packaging: "2go_packaging",
+        payor:
+          generalDetailsExpress.destination_system === "QAIR"
+            ? "shipper"
+            : generalDetailsExpress.payor,
+      })
+
+      var arr = []
+      arr.push({
+        description: "",
+        package_code: " ",
+        commodity_code:
+          generalDetailsExpress.destination_system === "QAIR"
+            ? qair_comms.filter((data) => data.code === "GC")
+            : zip_comms.filter((data) => data.code === "GC001"),
+        actual_weight: "",
+        length: "",
+        height: "",
+        width: "",
+        block_measurement: "0",
+        quantity: "1",
+        port_sticker_numbers: [],
+      })
+      setDocumentDetails(arr)
+    }
+  }
+
   return (
     <div>
       <Navbar></Navbar>
@@ -212,7 +279,7 @@ export default function Booking({
                           ? "btn-sm btn-radio btn-clicked"
                           : "btn-sm btn-radio"
                       }
-                      // onClick={() => handleTransactionTypeChange("document")}
+                      onClick={() => handleTransactionTypeChange("document")}
                     >
                       {" "}
                       Document{" "}
@@ -229,7 +296,7 @@ export default function Booking({
                         ? "btn-sm btn-radio btn-clicked"
                         : "btn-sm btn-radio"
                     }
-                    //   onClick={() => handleTransactionTypeChange("parcel")}
+                    onClick={() => handleTransactionTypeChange("parcel")}
                   >
                     {" "}
                     Parcel{" "}
