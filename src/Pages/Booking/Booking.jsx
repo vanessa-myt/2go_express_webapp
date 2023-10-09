@@ -77,8 +77,7 @@ export default function Booking({
   setHasDropoff,
   setAWb,
 }) {
-  //Handlers
-
+  /* Handlers */
   //specify package details based on chosen transaction type
   function handleTransactionTypeChange(type) {
     setPackageCodes([])
@@ -140,6 +139,75 @@ export default function Booking({
         port_sticker_numbers: [],
       })
       setDocumentDetails(arr)
+    }
+  }
+
+  //update field values on change
+  function handleDetailChange(e) {
+    const { name, value, checked } = e.target
+
+    if (name === "save_shipper") {
+      generalDetailsExpress["save_shipper"] = checked === true ? true : false
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        save_shipper: checked === true ? true : false,
+      })
+    } else if (name === "save_consignee") {
+      generalDetailsExpress["save_consignee"] = checked === true ? true : false
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        save_consignee: checked === true ? true : false,
+      })
+    } else if (name === "is_walk_in") {
+      setDropoff(false)
+
+      generalDetailsExpress["is_walk_in"] = checked === true ? true : false
+
+      generalDetailsExpress["account_number"] =
+        checked === true ? "WALK-IN" : ""
+      generalDetailsExpress["payment_term"] = ""
+      generalDetailsExpress["payor"] = ""
+
+      generalDetailsExpress["account_name"] = ""
+      generalDetailsExpress["account_cod_flag"] =
+        checked === true ? "" : generalDetailsExpress.account_cod_flag
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        is_walk_in: checked === true ? true : false,
+        payor: "shipper",
+        account_number: checked === true ? "WALK-IN" : "",
+        account_name: "",
+        payment_term: "cash",
+        payor: "shipper",
+        account_cod_flag:
+          checked === true ? "" : generalDetailsExpress.account_cod_flag,
+      })
+    } else if (name === "shipper_company") {
+      if (value === "") {
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          isewt: false,
+          reference: "",
+          express_attachments: [],
+          [name]: value,
+        })
+        //  setFileNames([])
+        //  setFiles([])
+      } else {
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          [name]: value,
+          isewt: true,
+        })
+      }
+    } else if (name === "isewt") {
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        isewt: true,
+        reference: value,
+      })
+    } else {
+      setGeneralDetailsExpress({ ...generalDetailsExpress, [name]: value })
     }
   }
 
@@ -363,7 +431,7 @@ export default function Booking({
                   name="service_type"
                   id="service_type"
                   value={generalDetailsExpress.service_type}
-                  // onChange={handleDetailChange}
+                  onChange={handleDetailChange}
                 >
                   <option value="">Select</option>
                   {serviceTypes.map((data) => {
@@ -414,12 +482,12 @@ export default function Booking({
                     type="checkbox"
                     id="is_walk_in"
                     name="is_walk_in"
-                    // disabled
+                    disabled
                     defaultChecked={
                       generalDetailsExpress.is_walk_in === true ||
                       generalDetailsExpress.account_number === "WALK-IN"
                     }
-                    //   onChange={handleDetailChange}
+                    // onChange={handleDetailChange}
                   />
                 </div>
               </div>
@@ -440,7 +508,7 @@ export default function Booking({
                     className="form-control input-font-sm input-group input-group-sm"
                     aria-label="ecust-acct"
                     aria-describedby="basic-addon1"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     disabled={
                       generalDetailsExpress.account_number === "WALK-IN"
                     }
@@ -479,7 +547,7 @@ export default function Booking({
                     className="form-control input-font-sm"
                     aria-label="ecust-acct"
                     aria-describedby="basic-addon1"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                   />
                 </span>
                 {/* <InputError
@@ -594,7 +662,7 @@ export default function Booking({
                     id="save_shipper"
                     name="save_shipper"
                     defaultChecked={generalDetailsExpress.save_shipper === true}
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                   />
                   <label> Save Shipper</label>
                 </div>
@@ -613,7 +681,7 @@ export default function Booking({
                     className="form-control input-font-sm"
                     aria-label="ecust-acct"
                     aria-describedby="basic-addon1"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                   />
                 </span>
                 {/* <InputError
@@ -637,7 +705,7 @@ export default function Booking({
                     className="form-control input-font-sm"
                     aria-label="ecust-acct"
                     aria-describedby="basic-addon1"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                   />
                 </span>
                 {/* <InputError
@@ -823,7 +891,7 @@ export default function Booking({
                   <input
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     name="shipper_address"
                     value={generalDetailsExpress.shipper_address}
                     type="text"
@@ -847,7 +915,7 @@ export default function Booking({
                   <input
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     name="shipper_contact"
                     value={generalDetailsExpress.shipper_contact}
                     type="number"
@@ -897,7 +965,7 @@ export default function Booking({
                   <input
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     name="shipper_area_code"
                     //   value={getBranchAreaCode()}
                     type="text"
@@ -1021,7 +1089,7 @@ export default function Booking({
                     defaultChecked={
                       generalDetailsExpress.save_consignee === true
                     }
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                   />
                   <label> Save Consignee</label>
                 </div>
@@ -1041,7 +1109,7 @@ export default function Booking({
                     className="form-control input-font-sm"
                     aria-label="ecust-acct"
                     aria-describedby="basic-addon1"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                   />
                 </span>
                 {/* <InputError
@@ -1059,7 +1127,7 @@ export default function Booking({
                   <input
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     name="consignee_name"
                     value={generalDetailsExpress.consignee_name}
                     type="text"
@@ -1245,7 +1313,7 @@ export default function Booking({
                     //   ref={consigneeAddress}
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     name="consignee_address"
                     value={generalDetailsExpress.consignee_address}
                     type="text"
@@ -1269,7 +1337,7 @@ export default function Booking({
                   <input
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    //   onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     name="consignee_contact"
                     value={generalDetailsExpress.consignee_contact}
                     type="number"
@@ -1301,7 +1369,7 @@ export default function Booking({
                   <input
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    // onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     name="consignee_origin"
                     value={
                       selectedConsigneeBrgy.length > 0
@@ -1326,7 +1394,7 @@ export default function Booking({
                   <input
                     autoComplete="new-password"
                     list="autocompleteOff"
-                    // onChange={handleDetailChange}
+                    onChange={handleDetailChange}
                     name="consignee_area_code"
                     value={
                       selectedConsigneeBrgy.length > 0
