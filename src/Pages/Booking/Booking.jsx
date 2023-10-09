@@ -421,42 +421,7 @@ export default function Booking({
               /> */}
               </div>
             </div>
-            <div className="row mt-2 justify-content-center">
-              <div className="col-sm-4">Is this a drop-off?</div>
-              <div className="col-sm-6">
-                <div className="form-check form-check-inline">
-                  <input
-                    autoComplete="new-password"
-                    list="autocompleteOff"
-                    className="form-check-input"
-                    type="checkbox"
-                    id="dropoff"
-                    name="dropoff"
-                    disabled={
-                      generalDetailsExpress.account_number === "WALK-IN"
-                    }
-                    checked={dropoff}
-                    onChange={(e) => {
-                      setDropoff(e.target.checked)
-                      //                 if(e.target.checked === false){
-                      // setHasDropoff(false)
-                      // setAWb("")
-                      //                 }
 
-                      if (generalDetailsExpress.dropoff_is_allowed === 1) {
-                        //   toast.success("This account is allowed to drop-off.")
-                      }
-                      if (generalDetailsExpress.dropoff_is_allowed === 0) {
-                        //   setShowUnallowedModal(true)
-                        setDropoff(false)
-                        setHasDropoff(false)
-                        // setAWb("")
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
             <div className="row mt-2 justify-content-center">
               <div className="col-sm-4">
                 Who will Pay?<label className="badge">{` *`}</label>
@@ -549,70 +514,7 @@ export default function Booking({
                 <h5>SHIPPER DETAILS</h5>
               </div>
             </div>
-            <div
-              className={
-                hasResultShipper
-                  ? "row justify-content-center"
-                  : "row mb-3 mt-2 justify-content-center"
-              }
-            >
-              <div className="col-sm-10">
-                <div className=" input-group form-group">
-                  <input
-                    type="text"
-                    className="form-control search-input"
-                    aria-label="Search"
-                    placeholder="Search Shipper"
-                    value={searchInputShipper}
-                    onChange={(e) => setSearchInputShipper(e.target.value)}
-                  />
-                  <div className="input-group-append">
-                    <span
-                      className="input-group-text search-icon"
-                      id="basic-addon1"
-                    >
-                      {searchingShipper ? (
-                        <ReactLoading
-                          className="search-icon loader"
-                          type="balls"
-                          color="#EC0B8C"
-                          height={24}
-                          width={25}
-                        />
-                      ) : (
-                        <img
-                          src={search}
-                          alt="search"
-                          className="search-icon"
-                          // onClick={handleSearchShipper}
-                        />
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {hasResultShipper && (
-              <div className="row search-container express">
-                <div className="col-sm-10">
-                  {resultsShipper.map((data) => (
-                    <div className="input-group form-group ">
-                      <input
-                        type="text"
-                        readOnly
-                        id="search-result-input"
-                        className="form-control search-results"
-                        aria-label="Search"
-                        placeholder="Search"
-                        value={data.name}
-                        name={data.id}
-                        //   onClick={() => handleResultShipperClick(data)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+
             <div className="row mt-2 justify-content-center">
               <div className="col-sm-4"></div>
               <div className="col-sm-6">
@@ -903,7 +805,7 @@ export default function Booking({
 
             {/* Origin/Area Code of shipper is of Outlet. */}
 
-            <div className="row mt-2 justify-content-center">
+            <div className="row mt-4 justify-content-center">
               <div className="col-sm-4">
                 Origin/Area Code<label className="badge">{` *`}</label>
               </div>
@@ -941,7 +843,7 @@ export default function Booking({
               </div>
             </div>
 
-            <div className="row mt-2 justify-content-center">
+            {/* <div className="row mt-2 justify-content-center">
               <div className="col-sm-4 pt-1">
                 EWT<label className="badge">{` *`}</label>
               </div>
@@ -983,7 +885,7 @@ export default function Booking({
                   </label>
                 </div>
               </div>
-            </div>
+            </div> */}
             <div className="row justify-content-center">
               <div className="col-sm-4"></div>
               <div className="col-sm-8">
@@ -993,7 +895,7 @@ export default function Booking({
               /> */}
               </div>
             </div>
-            <div className="row mt-2 mb-3 justify-content-center">
+            {/* <div className="row mt-2 mb-3 justify-content-center">
               <div className="col-sm-4 pt-1">EWT Photo</div>
               <div className="col-sm-6 input-group-sm">
                 <input
@@ -1008,12 +910,12 @@ export default function Booking({
                   // onChange={handleUpload}
                   disabled={generalDetailsExpress.shipper_company === ""}
                 />
-                {/* <InputError
+                <InputError
                 isValid={isError.express_attachments}
                 message={"This field is required*"}
-              /> */}
+              />
               </div>
-            </div>
+            </div> */}
             {/* <div className="row mt-2 justify-content-center"> */}
             {fileNames.map((file, i) => {
               return (
@@ -1037,122 +939,7 @@ export default function Booking({
               </div>
             </div>
 
-            <div
-              className={
-                hasResultConsignee
-                  ? "row justify-content-center"
-                  : "row mb-3 mt-2 justify-content-center"
-              }
-            >
-              <div className="col-sm-10">
-                <div className=" input-group form-group">
-                  <input
-                    type="text"
-                    className="form-control search-input"
-                    aria-label="Search"
-                    placeholder="Search Consignee"
-                    value={searchInputConsignee}
-                    onChange={(e) => setSearchInputConsignee(e.target.value)}
-                  />
-                  <div className="input-group-append">
-                    <span
-                      className="input-group-text search-icon"
-                      id="basic-addon1"
-                    >
-                      {searchingConsignee ? (
-                        <ReactLoading
-                          className="search-icon loader"
-                          type="balls"
-                          color="#EC0B8C"
-                          height={24}
-                          width={25}
-                        />
-                      ) : (
-                        <img
-                          src={search}
-                          alt="search"
-                          className="search-icon"
-                          // onClick={handleSearchConsignee}
-                        />
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {hasResultConsignee && (
-              <div className="row search-container express">
-                <div className="col-sm-10">
-                  {resultsConsignee.map((data) => (
-                    <div className="input-group form-group ">
-                      <input
-                        type="text"
-                        readOnly
-                        id="search-result-input"
-                        className="form-control search-results"
-                        aria-label="Search"
-                        placeholder="Search"
-                        value={data.name}
-                        name={data.id}
-                        //   onClick={() => handleResultConsigneeClick(data)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
             <div className="row mt-2 justify-content-center">
-              <div className="col-sm-4">Pickup?</div>
-              <div className="col-sm-6">
-                <div className="form-check form-check-inline">
-                  <input
-                    autoComplete="new-password"
-                    list="autocompleteOff"
-                    className="form-check-input"
-                    type="checkbox"
-                    id="pickup"
-                    name="pickup"
-                    defaultChecked={pickup}
-                    onChange={(e) => {
-                      setPickup(e.target.checked)
-                      if (e.target.checked === false) {
-                        setSelectedOutlet([])
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-            {pickup && (
-              <div className="row justify-content-center">
-                <div className="col-sm-4 pt-2">2GO Outlet</div>
-                <div className="col-sm-6">
-                  <span>
-                    <Typeahead
-                      inputProps={{
-                        autoComplete: "new-password",
-                        list: "autoComplete",
-                      }}
-                      autoComplete="new-password"
-                      list="autocompleteOff"
-                      size="sm"
-                      className="pt-0"
-                      id="basic-typeahead-single"
-                      labelKey="name"
-                      onChange={setSelectedOutlet}
-                      options={pickupOutlets}
-                      placeholder="Choose outlet"
-                      selected={selectedOutlet}
-                    />
-                  </span>
-                  {/* <InputError
-                  isValid={isError.pickup_outlet}
-                  message={"This field is required*"}
-                /> */}
-                </div>
-              </div>
-            )}
-            <div className="row mt-4 justify-content-center">
               {/* <div className="row mt-2 justify-content-center"> */}
               <div className="col-sm-4"></div>
               <div className="col-sm-6">
@@ -1494,19 +1281,12 @@ export default function Booking({
               </div>
             </div>
 
-            <div className="row mb-4 mt-5">
+            <div className="row mb-2 mt-5 p-4">
               <div className="col-sm-2">
                 <button
                   className="btn-back btn-rad"
                   onClick={() => {
-                    if (expressType === "NEW") {
-                      setTimeout(() => {
-                        //   navigateto("/dashboard")
-                        //   refreshPage()
-                      }, 1000)
-                    } else {
-                      // navigateto(-1)
-                    }
+                    navigation.go("/dashboard")
                   }}
                 >
                   Back{" "}
