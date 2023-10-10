@@ -861,6 +861,7 @@ function SwitchForm() {
     setDropoff,
     setHasDropoff,
     setAWb,
+    packageCodes
   }
   const packageDetailsProps = {
     navigation,
