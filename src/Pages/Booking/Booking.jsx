@@ -1,4 +1,4 @@
-import { ToastContainer } from "react-toastify"
+import { ToastContainer, toast } from "react-toastify"
 import Navbar from "../../Components/Navbar/Navbar"
 import { Button } from "antd"
 import "./Package.css"
@@ -6,13 +6,20 @@ import ReactLoading from "react-loading"
 import { qair_comms } from "../../Assets/Commodities/QAirComms"
 import { zip_comms } from "../../Assets/Commodities/ZipComms"
 import { Typeahead } from "react-bootstrap-typeahead"
-import { useState } from "react"
-import { searchAreas } from "../../Helpers/ApiCalls/expressAPI"
+import { useEffect, useState } from "react"
+import {
+  createExpress,
+  searchAreas,
+  searchPackageCodes,
+} from "../../Helpers/ApiCalls/expressAPI"
 import erroricon from "../../Assets/Modals/erroricon.png"
 import caution from "../../Assets/Modals/caution.png"
 import { Accordion, Form, Modal } from "react-bootstrap"
 import { formatPrice } from "../../Helpers/Utils/Common"
-import { validatePrimaryDetails } from "../../Helpers/Validation/expressValidation"
+import {
+  validatePackage,
+  validatePrimaryDetails,
+} from "../../Helpers/Validation/expressValidation"
 import InputError from "../../Components/InputError/InputError"
 
 export default function Booking({
@@ -90,6 +97,7 @@ export default function Booking({
   /* Variables */
   const [openOsa, setOpenOsa] = useState(false)
   const [openOtd, setOpenOtd] = useState(false)
+  const [isClicked, setIsClicked] = useState(false)
 
   /*Validation Variables */
   const [isError, setIsError] = useState({
@@ -133,10 +141,23 @@ export default function Booking({
     declared_value: false,
     cod_amount: false,
     rate_classification: false,
-
-    //pudo
-    pickup_outlet: false,
+    has_package: false,
   })
+  const [packageErrorDetail, setPackageErrorDetail] = useState([
+    {
+      description: false,
+      package_code: false,
+      commodity_code: false,
+      actual_weight: false,
+      response_weight: false,
+      length: false,
+      height: false,
+      width: false,
+      block_measurement: false,
+      quantity: false,
+      port_sticker_numbers: false,
+    },
+  ])
 
   /* Handlers */
 
@@ -206,6 +227,75 @@ export default function Booking({
 
   //update field values on change
   function handleDetailChange(e) {
+    const { name, value, checked } = e.target
+
+    if (name === "save_shipper") {
+      generalDetailsExpress["save_shipper"] = checked === true ? true : false
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        save_shipper: checked === true ? true : false,
+      })
+    } else if (name === "save_consignee") {
+      generalDetailsExpress["save_consignee"] = checked === true ? true : false
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        save_consignee: checked === true ? true : false,
+      })
+    } else if (name === "is_walk_in") {
+      setDropoff(false)
+
+      generalDetailsExpress["is_walk_in"] = checked === true ? true : false
+
+      generalDetailsExpress["account_number"] =
+        checked === true ? "WALK-IN" : ""
+      generalDetailsExpress["payment_term"] = ""
+      generalDetailsExpress["payor"] = ""
+
+      generalDetailsExpress["account_name"] = ""
+      generalDetailsExpress["account_cod_flag"] =
+        checked === true ? "" : generalDetailsExpress.account_cod_flag
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        is_walk_in: checked === true ? true : false,
+        payor: "shipper",
+        account_number: checked === true ? "WALK-IN" : "",
+        account_name: "",
+        payment_term: "cash",
+        payor: "shipper",
+        account_cod_flag:
+          checked === true ? "" : generalDetailsExpress.account_cod_flag,
+      })
+    } else if (name === "shipper_company") {
+      if (value === "") {
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          isewt: false,
+          reference: "",
+          express_attachments: [],
+          [name]: value,
+        })
+        //  setFileNames([])
+        //  setFiles([])
+      } else {
+        setGeneralDetailsExpress({
+          ...generalDetailsExpress,
+          [name]: value,
+          isewt: true,
+        })
+      }
+    } else if (name === "isewt") {
+      setGeneralDetailsExpress({
+        ...generalDetailsExpress,
+        isewt: true,
+        reference: value,
+      })
+    } else {
+      setGeneralDetailsExpress({ ...generalDetailsExpress, [name]: value })
+    }
+  }
+
+  //package event handler
+  function handlePackageDetailChange(e) {
     const { name, value, checked } = e.target
 
     if (name === "save_shipper") {
@@ -710,13 +800,208 @@ export default function Booking({
       if (generalDetailsExpress.consignee_delivery_category === "OTD") {
         setOpenOtd(true)
       } else {
+        handleNextPackage()
         // navigation.next()
       }
     }
   }
 
+  const handleNextPackage = () => {
+    var total_qty = documentDetails
+      .map((data) => parseFloat(data.quantity))
+      .reduce((a, b) => a + b, 0)
+
+    setGeneralDetailsExpress({
+      ...generalDetailsExpress,
+      total_qty: total_qty,
+    })
+    if (
+      total_qty > 1 ||
+      (generalDetailsExpress.destination_system === "ZIP-R" &&
+        generalDetailsExpress.transaction_type === "cargo")
+    ) {
+      var final_details = [...documentDetails]
+      final_details.map((data) => {
+        data.port_sticker_numbers = []
+        for (var i = 0; i < parseInt(data.quantity); i++) {
+          data.port_sticker_numbers.push({
+            id: i,
+            serial: "",
+            invalid: false,
+          })
+        }
+      })
+      setDocumentDetails(final_details)
+    }
+    var valid_package = true
+    var error_package = []
+    var checker = false
+    // if (
+    //   generalDetailsExpress.transaction_type === "parcel" &&
+    //   generalDetailsExpress.packaging === "2go_packaging"
+    // ) {
+
+    // }
+
+    if (
+      validatePackage(
+        generalDetailsExpress,
+        documentDetails,
+        setIsError,
+        setPackageErrorDetail,
+        packageErrorDetail
+      )
+    ) {
+      documentDetails.map((data, key) => {
+        if (
+          packageCodes[parseInt(data.package_code)]["description"] ===
+            "CARGO - BUDGET BOX VIA LAND " ||
+          packageCodes[parseInt(data.package_code)]["description"] ===
+            "CARGO - BUDGET BOX VIA LAND (NON BOX)"
+        ) {
+          if (data.actual_weight !== "" && data.response_weight !== "") {
+            if (
+              parseFloat(data.actual_weight) <= parseFloat(data.response_weight)
+            ) {
+              valid_package = valid_package && true
+            } else {
+              valid_package = valid_package && false
+              error_package.push(
+                `USER ERROR: Error in Package ${key + 1}: Weight(${
+                  data.actual_weight
+                }) can't be more than the weight in the master (${
+                  data.response_weight
+                })`
+              )
+            }
+          }
+        }
+      })
+      checker = true
+    }
+    if (checker) {
+      if (valid_package) {
+        setIsClicked(true)
+
+        add()
+        // if (
+        //   (generalDetailsExpress.transaction_type === "parcel" ||
+        //     generalDetailsExpress.transaction_type === "cargo") &&
+        //   total_qty > 1
+        // ) {
+        //   if (
+        //     validatePackage(
+        //       generalDetailsExpress,
+        //       documentDetails,
+        //       setIsError,
+        //       setPackageErrorDetail,
+        //       packageErrorDetail
+        //     )
+        //   ) {
+        //     navigation.next();
+        //   }
+        // }
+        //  else {
+
+        // navigation.go("summary")
+        // }
+      } else {
+        error_package.map((data) => {
+          toast.error(data, {
+            autoClose: 4000,
+            hideProgressBar: true,
+          })
+        })
+      }
+    }
+
+    // add();
+    // navigation.next();
+  }
+
+  //get package codes list
+  async function fetchPackageCodes() {
+    setPackageCodes([])
+    const response = await searchPackageCodes(generalDetailsExpress)
+    if (response.data) {
+      setPackageCodes(response.data)
+    }
+  }
+  async function fetchPackageCodesWParam(value) {
+    setPackageCodes([])
+    const response = await searchPackageCodes({
+      packaging: value,
+      shipment_mode: generalDetailsExpress.destination_system,
+      destination_system: generalDetailsExpress.destination_system,
+      transaction_type: generalDetailsExpress.transaction_type,
+      // rate_classification: generalDetailsExpress.rate_classification,
+    })
+    if (response.data) {
+      setPackageCodes(response.data)
+    }
+  }
+
+  //add booking
+  async function add() {
+    const response = await createExpress(
+      generalDetailsExpress,
+      documentDetails,
+      packageCodes,
+      expressType,
+      selectedOutlet
+    )
+
+    if (response.error) {
+      if (Array.isArray(response.error.data.messages) === true) {
+        response.error.data.messages.map((data) => {
+          toast.error(data.message.toUpperCase(), {
+            autoClose: 2000,
+            hideProgressBar: true,
+          })
+        })
+      } else {
+        toast.error(response.error.data.messages.error.toUpperCase(), {
+          autoClose: 2000,
+          hideProgressBar: true,
+        })
+      }
+
+      // toast.error(response.error.data.messages.error, {
+      //   autoClose: 2000,
+      //   hideProgressBar: true,
+      // })
+
+      setIsClicked(false)
+    }
+
+    if (response.data) {
+      toast.success(response.data.response.toUpperCase(), {
+        autoClose: 2000,
+        hideProgressBar: true,
+      })
+      // setTransactionID(response.data.transaction_id)
+      // setBreakDown(response.data.breakdown)
+      setTimeout(() => {
+        setIsClicked(false)
+        alert("successfully added")
+      }, 1000)
+    }
+
+    // navigation.next()
+  }
+
+  useEffect(() => {
+    if (generalDetailsExpress.transaction_type === "document") {
+      fetchPackageCodes()
+    }
+    if (generalDetailsExpress.transaction_type === "parcel") {
+      fetchPackageCodesWParam("2go_packaging")
+    }
+  }, [generalDetailsExpress.transaction_type])
+
   return (
     <div>
+      <ToastContainer />
       <Navbar></Navbar>
       <div className="container">
         <h1 className="row mb-4 text-center header title mt-5 ml-5">
@@ -1178,10 +1463,6 @@ export default function Booking({
                     onChange={handleDetailChange}
                   />
                 </span>
-                <InputError
-                  isValid={isError.shipper_name}
-                  message={"This field is required*"}
-                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1542,10 +1823,6 @@ export default function Booking({
                     onChange={handleDetailChange}
                   />
                 </span>
-                <InputError
-                  isValid={isError.shipper_name}
-                  message={"This field is required*"}
-                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1826,7 +2103,7 @@ export default function Booking({
                         className="form-control input-font-sm"
                         aria-label="ecust-acct"
                         aria-describedby="basic-addon1"
-                        onChange={handleDetailChange}
+                        onChange={handlePackageDetailChange}
                         disabled={
                           generalDetailsExpress.transaction_type === "parcel"
                         }
@@ -1839,10 +2116,10 @@ export default function Booking({
                         <option value={"own_packaging"}>Own Packaging</option>
                       </Form.Select>
                     </span>
-                    {/* <InputError
+                    <InputError
                       isValid={isError.packaging}
                       message={"This field is required*"}
-                    /> */}
+                    />
                   </div>
                   <div className="col-sm-2"></div>
                   <div className="col-sm-3">
@@ -1888,13 +2165,13 @@ export default function Booking({
                         className="form-control input-font-sm"
                         aria-label="ecust-acct"
                         aria-describedby="basic-addon1"
-                        onChange={handleDetailChange}
+                        onChange={handlePackageDetailChange}
                       />
                     </span>
-                    {/* <InputError
+                    <InputError
                       isValid={isError.declared_value}
                       message={"This field is required*"}
-                    /> */}
+                    />
                   </div>
                 </>
               ) : (
@@ -1910,7 +2187,7 @@ export default function Booking({
                         className="form-control input-font-sm"
                         aria-label="ecust-acct"
                         aria-describedby="basic-addon1"
-                        onChange={handleDetailChange}
+                        onChange={handlePackageDetailChange}
                         disabled={
                           generalDetailsExpress.destination_system === "QAIR"
                         }
@@ -1923,10 +2200,10 @@ export default function Booking({
                         <option value="CFC">CFC - Interport</option>
                       </Form.Select>
                     </span>
-                    {/* <InputError
+                    <InputError
                       isValid={isError.rate_classification}
                       message={"This field is required*"}
-                    /> */}
+                    />
                   </div>
                 </>
               )}
@@ -1942,14 +2219,14 @@ export default function Booking({
                     className="form-control input-font-sm"
                     aria-label="ecust-acct"
                     aria-describedby="basic-addon1"
-                    onChange={handleDetailChange}
+                    onChange={handlePackageDetailChange}
                     disabled={generalDetailsExpress.account_cod_flag === "0"}
                   />
                 </span>
-                {/* <InputError
+                <InputError
                   isValid={isError.cod_amount}
                   message={"This field is required*"}
-                /> */}
+                />
               </div>
             </div>
             {generalDetailsExpress.transaction_type !== "document" && (
@@ -1966,7 +2243,7 @@ export default function Booking({
                         className="form-control input-font-sm"
                         aria-label="ecust-acct"
                         aria-describedby="basic-addon1"
-                        onChange={handleDetailChange}
+                        onChange={handlePackageDetailChange}
                         disabled={
                           generalDetailsExpress.destination_system === "QAIR"
                         }
@@ -1979,10 +2256,10 @@ export default function Booking({
                         <option value="CFC">CFC - Interport</option>
                       </Form.Select>
                     </span>
-                    {/* <InputError
+                    <InputError
                       isValid={isError.rate_classification}
                       message={"This field is required*"}
-                    /> */}
+                    />
                   </div>
                   <div className="col-sm-2 pt-1">Remarks</div>
                   <div className="col-sm-3">
@@ -1996,7 +2273,7 @@ export default function Booking({
                         className="form-control input-font-sm"
                         aria-label="ecust-acct"
                         aria-describedby="basic-addon1"
-                        onChange={handleDetailChange}
+                        onChange={handlePackageDetailChange}
                         // disabled={generalDetailsExpress.account_cod_flag === "0"}
                       />
                     </span>
@@ -2018,7 +2295,7 @@ export default function Booking({
                       className="form-control input-font-sm"
                       aria-label="ecust-acct"
                       aria-describedby="basic-addon1"
-                      onChange={handleDetailChange}
+                      onChange={handlePackageDetailChange}
                       // disabled={generalDetailsExpress.account_cod_flag === "0"}
                     />
                   </span>
@@ -2102,14 +2379,14 @@ export default function Booking({
                                           )
                                         })}
                                       </Form.Select>
-                                      {/* <InputError
-                                    isValid={
-                                      packageErrorDetail[parseInt(key)][
-                                        "package_code"
-                                      ]
-                                    }
-                                    message={"This field is required*"}
-                                  /> */}
+                                      <InputError
+                                        isValid={
+                                          packageErrorDetail[parseInt(key)][
+                                            "package_code"
+                                          ]
+                                        }
+                                        message={"This field is required*"}
+                                      />
                                     </div>
                                   </div>
                                   <div className="col-12 p-3 col-grey">
@@ -2152,14 +2429,14 @@ export default function Booking({
                                         }}
                                       />
 
-                                      {/* <InputError
-                                    isValid={
-                                      packageErrorDetail[parseInt(key)][
-                                        "commodity_code"
-                                      ]
-                                    }
-                                    message={"This field is required*"}
-                                  /> */}
+                                      <InputError
+                                        isValid={
+                                          packageErrorDetail[parseInt(key)][
+                                            "commodity_code"
+                                          ]
+                                        }
+                                        message={"This field is required*"}
+                                      />
                                     </div>
                                   </div>
                                   <div className="col-12 p-3 col-grey">
@@ -2196,14 +2473,14 @@ export default function Booking({
                                               }
                                             />
                                           </div>
-                                          {/* <InputError
-                                        isValid={
-                                          packageErrorDetail[parseInt(key)][
-                                            "quantity"
-                                          ]
-                                        }
-                                        message={"This field is required*"}
-                                      /> */}
+                                          <InputError
+                                            isValid={
+                                              packageErrorDetail[parseInt(key)][
+                                                "quantity"
+                                              ]
+                                            }
+                                            message={"This field is required*"}
+                                          />
                                         </div>
                                       </div>
                                     </div>
@@ -2230,7 +2507,7 @@ export default function Booking({
                                         type="checkbox"
                                         className="custom-control-inpu mr-10"
                                         id="purchase-limit"
-                                      />
+                                      />{" "}
                                       <label
                                         className="custom-control-label"
                                         htmlFor="purchase-limit"
@@ -2295,14 +2572,16 @@ export default function Booking({
                                                 )
                                               }
                                             />
-                                            {/* <InputError
-                                          isValid={
-                                            packageErrorDetail[parseInt(key)][
-                                              "length"
-                                            ]
-                                          }
-                                          message={"This field is required*"}
-                                        /> */}
+                                            <InputError
+                                              isValid={
+                                                packageErrorDetail[
+                                                  parseInt(key)
+                                                ]["length"]
+                                              }
+                                              message={
+                                                "This field is required*"
+                                              }
+                                            />
                                           </div>
                                         </div>
                                       </div>
@@ -2352,14 +2631,16 @@ export default function Booking({
                                                 )
                                               }
                                             />
-                                            {/* <InputError
-                                          isValid={
-                                            packageErrorDetail[parseInt(key)][
-                                              "width"
-                                            ]
-                                          }
-                                          message={"This field is required*"}
-                                        /> */}
+                                            <InputError
+                                              isValid={
+                                                packageErrorDetail[
+                                                  parseInt(key)
+                                                ]["width"]
+                                              }
+                                              message={
+                                                "This field is required*"
+                                              }
+                                            />
                                           </div>
                                         </div>
                                       </div>
@@ -2409,14 +2690,16 @@ export default function Booking({
                                                 )
                                               }
                                             />
-                                            {/* <InputError
-                                          isValid={
-                                            packageErrorDetail[parseInt(key)][
-                                              "height"
-                                            ]
-                                          }
-                                          message={"This field is required*"}
-                                        /> */}
+                                            <InputError
+                                              isValid={
+                                                packageErrorDetail[
+                                                  parseInt(key)
+                                                ]["height"]
+                                              }
+                                              message={
+                                                "This field is required*"
+                                              }
+                                            />
                                           </div>
                                         </div>
                                       </div>
@@ -2481,14 +2764,14 @@ export default function Booking({
                                               </span>
                                             </div>
                                           </div>
-                                          {/* <InputError
-                                        isValid={
-                                          packageErrorDetail[parseInt(key)][
-                                            "actual_weight"
-                                          ]
-                                        }
-                                        message={"This field is required*"}
-                                      /> */}
+                                          <InputError
+                                            isValid={
+                                              packageErrorDetail[parseInt(key)][
+                                                "actual_weight"
+                                              ]
+                                            }
+                                            message={"This field is required*"}
+                                          />
                                         </div>
                                       </div>
                                     </div>
@@ -2523,14 +2806,14 @@ export default function Booking({
                                               }
                                             />
                                           </div>
-                                          {/* <InputError
-                                        isValid={
-                                          packageErrorDetail[parseInt(key)][
-                                            "description"
-                                          ]
-                                        }
-                                        message={"This field is required*"}
-                                      /> */}
+                                          <InputError
+                                            isValid={
+                                              packageErrorDetail[parseInt(key)][
+                                                "description"
+                                              ]
+                                            }
+                                            message={"This field is required*"}
+                                          />
                                         </div>
                                       </div>
                                     </div>
@@ -2577,14 +2860,14 @@ export default function Booking({
                                         )
                                       })}
                                     </Form.Select>
-                                    {/* <InputError
-                                  isValid={
-                                    packageErrorDetail[parseInt(key)][
-                                      "package_code"
-                                    ]
-                                  }
-                                  message={"This field is required*"}
-                                /> */}
+                                    <InputError
+                                      isValid={
+                                        packageErrorDetail[parseInt(key)][
+                                          "package_code"
+                                        ]
+                                      }
+                                      message={"This field is required*"}
+                                    />
                                   </div>
                                 </div>
                                 <div className="col-6 p-3 col-grey">
@@ -2627,14 +2910,14 @@ export default function Booking({
                                       }}
                                     />
 
-                                    {/* <InputError
-                                  isValid={
-                                    packageErrorDetail[parseInt(key)][
-                                      "commodity_code"
-                                    ]
-                                  }
-                                  message={"This field is required*"}
-                                /> */}
+                                    <InputError
+                                      isValid={
+                                        packageErrorDetail[parseInt(key)][
+                                          "commodity_code"
+                                        ]
+                                      }
+                                      message={"This field is required*"}
+                                    />
                                   </div>
                                 </div>
                               </div>
@@ -2684,14 +2967,14 @@ export default function Booking({
                                         </span>
                                       </div>
                                     </div>
-                                    {/* <InputError
-                                  isValid={
-                                    packageErrorDetail[parseInt(key)][
-                                      "actual_weight"
-                                    ]
-                                  }
-                                  message={"This field is required*"}
-                                /> */}
+                                    <InputError
+                                      isValid={
+                                        packageErrorDetail[parseInt(key)][
+                                          "actual_weight"
+                                        ]
+                                      }
+                                      message={"This field is required*"}
+                                    />
                                   </div>
                                 </div>
                                 <div className="col-2">
@@ -2748,14 +3031,14 @@ export default function Booking({
                                           handleDetailsChange(e, key, data)
                                         }
                                       />
-                                      {/* <InputError
-                                    isValid={
-                                      packageErrorDetail[parseInt(key)][
-                                        "length"
-                                      ]
-                                    }
-                                    message={"This field is required*"}
-                                  /> */}
+                                      <InputError
+                                        isValid={
+                                          packageErrorDetail[parseInt(key)][
+                                            "length"
+                                          ]
+                                        }
+                                        message={"This field is required*"}
+                                      />
                                     </div>
                                   </div>
                                 </div>
@@ -2806,12 +3089,14 @@ export default function Booking({
                                           handleDetailsChange(e, key, data)
                                         }
                                       />
-                                      {/* <InputError
-                                    isValid={
-                                      packageErrorDetail[parseInt(key)]["width"]
-                                    }
-                                    message={"This field is required*"}
-                                  /> */}
+                                      <InputError
+                                        isValid={
+                                          packageErrorDetail[parseInt(key)][
+                                            "width"
+                                          ]
+                                        }
+                                        message={"This field is required*"}
+                                      />
                                     </div>
                                   </div>
                                 </div>
@@ -2862,14 +3147,14 @@ export default function Booking({
                                           handleDetailsChange(e, key, data)
                                         }
                                       />
-                                      {/* <InputError
-                                    isValid={
-                                      packageErrorDetail[parseInt(key)][
-                                        "height"
-                                      ]
-                                    }
-                                    message={"This field is required*"}
-                                  /> */}
+                                      <InputError
+                                        isValid={
+                                          packageErrorDetail[parseInt(key)][
+                                            "height"
+                                          ]
+                                        }
+                                        message={"This field is required*"}
+                                      />
                                     </div>
                                   </div>
                                 </div>
@@ -2909,14 +3194,14 @@ export default function Booking({
                                               handleDetailsChange(e, key, data)
                                             }
                                           />
-                                          {/* <InputError
-                                        isValid={
-                                          packageErrorDetail[parseInt(key)][
-                                            "quantity"
-                                          ]
-                                        }
-                                        message={"This field is required*"}
-                                      /> */}
+                                          <InputError
+                                            isValid={
+                                              packageErrorDetail[parseInt(key)][
+                                                "quantity"
+                                              ]
+                                            }
+                                            message={"This field is required*"}
+                                          />
                                         </div>
                                       </div>
                                     </div>
@@ -2947,12 +3232,14 @@ export default function Booking({
                                         }
                                       />
                                     </div>
-                                    {/* <InputError
-                            isValid={
-                              packageErrorDetail[parseInt(key)]["description"]
-                            }
-                            message={"This field is required*"}
-                          /> */}
+                                    <InputError
+                                      isValid={
+                                        packageErrorDetail[parseInt(key)][
+                                          "description"
+                                        ]
+                                      }
+                                      message={"This field is required*"}
+                                    />
                                   </div>
                                 </div>
                               </div>
@@ -3000,7 +3287,8 @@ export default function Booking({
                     <button
                       type="submit"
                       className="btn-next btn-rad"
-                      onClick={handleNext}
+                      // onClick={handleNext}
+                      onClick={() => navigation.next()}
                     >
                       {" "}
                       Next{" "}
@@ -3103,6 +3391,7 @@ export default function Booking({
                       }}
                       onClick={() => {
                         setOpenOtd(false)
+                        handleNextPackage()
                         // navigation.next()
                       }}
                     >
