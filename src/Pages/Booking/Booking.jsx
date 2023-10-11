@@ -9,8 +9,11 @@ import { Typeahead } from "react-bootstrap-typeahead"
 import { useState } from "react"
 import { searchAreas } from "../../Helpers/ApiCalls/expressAPI"
 import erroricon from "../../Assets/Modals/erroricon.png"
+import caution from "../../Assets/Modals/caution.png"
 import { Accordion, Form, Modal } from "react-bootstrap"
 import { formatPrice } from "../../Helpers/Utils/Common"
+import { validatePrimaryDetails } from "../../Helpers/Validation/expressValidation"
+import InputError from "../../Components/InputError/InputError"
 
 export default function Booking({
   navigation,
@@ -87,6 +90,53 @@ export default function Booking({
   /* Variables */
   const [openOsa, setOpenOsa] = useState(false)
   const [openOtd, setOpenOtd] = useState(false)
+
+  /*Validation Variables */
+  const [isError, setIsError] = useState({
+    destination_system: false,
+    transaction_type: false,
+    service_type: false,
+    //Account Details
+    is_walk_in: false,
+    account_number: false,
+    account_name: false,
+    payor: false,
+    account_short_name: false,
+    account_address: false,
+    account_cod_flag: false,
+    /*SHIPPER */
+    shipper_name: false,
+    shipper_province: false,
+    shipper_city: false,
+    shipper_brgy: false,
+    shipper_postal: false,
+    shipper_address: false,
+    shipper_contact: false,
+    shipper_contact_error: false,
+    isewt: false,
+    reference: false,
+    express_attachments: false,
+
+    /*CONSIGNEE */
+    consignee_name: false,
+    consignee_province: false,
+    consignee_city: false,
+    consignee_brgy: false,
+    consignee_postal: false,
+    consignee_address: false,
+    consignee_contact: false,
+    consignee_contact_error: false,
+    consignee_origin: false,
+    consignee_area_code: false,
+    //generic package details
+    packaging: false,
+    declared_value: false,
+    cod_amount: false,
+    rate_classification: false,
+
+    //pudo
+    pickup_outlet: false,
+  })
 
   /* Handlers */
 
@@ -647,6 +697,24 @@ export default function Booking({
     // }
   }
 
+  //validations
+  const handleNext = () => {
+    if (
+      validatePrimaryDetails(
+        generalDetailsExpress,
+        pickup,
+        selectedOutlet,
+        setIsError
+      )
+    ) {
+      if (generalDetailsExpress.consignee_delivery_category === "OTD") {
+        setOpenOtd(true)
+      } else {
+        // navigation.next()
+      }
+    }
+  }
+
   return (
     <div>
       <Navbar></Navbar>
@@ -760,11 +828,11 @@ export default function Booking({
             </div>
             <div className="row justify-content-center">
               <div className="col-sm-4"></div>
-              <div className="col-sm-8">
-                {/* <InputError
-                isValid={isError.destination_system}
-                message={"This field is required*"}
-              /> */}
+              <div className="col-sm-6">
+                <InputError
+                  isValid={isError.destination_system}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -848,11 +916,11 @@ export default function Booking({
             </div>
             <div className="row justify-content-center">
               <div className="col-sm-4"></div>
-              <div className="col-sm-8">
-                {/* <InputError
-                isValid={isError.transaction_type}
-                message={"This field is required*"}
-              /> */}
+              <div className="col-sm-6">
+                <InputError
+                  isValid={isError.transaction_type}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -886,17 +954,14 @@ export default function Booking({
                     )
                   })}
                 </select>
-                {/* <InputError
-                isValid={isError.service_type}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.service_type}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <hr />
-            {/* 
-        If pay mode is CC or CS, check in list if COD is Y/N. Y=required; N=0. 
-        If pay mode is CC or CS, must encode account number.
-      */}
+
             <div className="row justify-content-center">
               <div className="col-sm color-pink text-center mb-2">
                 <h5>ACCOUNT DETAILS</h5>
@@ -1067,10 +1132,10 @@ export default function Booking({
               <div className="col-sm-4"></div>
               <div className="col-sm-4">
                 {" "}
-                {/* <InputError
-                isValid={isError.payor}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.payor}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <hr />
@@ -1113,10 +1178,10 @@ export default function Booking({
                     onChange={handleDetailChange}
                   />
                 </span>
-                {/* <InputError
-            isValid={isError.shipper_name}
-            message={"This field is required*"}
-          /> */}
+                <InputError
+                  isValid={isError.shipper_name}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1137,10 +1202,10 @@ export default function Booking({
                     onChange={handleDetailChange}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.shipper_name}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.shipper_name}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1168,10 +1233,10 @@ export default function Booking({
                     selected={selectedShipperProvince}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.shipper_province}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.shipper_province}
+                  message={"This field is required*"}
+                />
               </div>
               <div className="col-3">
                 <span>
@@ -1193,10 +1258,10 @@ export default function Booking({
                     selected={selectedShipperCity}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.shipper_city}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.shipper_city}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1222,10 +1287,10 @@ export default function Booking({
                     selected={selectedShipperBrgy}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.shipper_brgy}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.shipper_brgy}
+                  message={"This field is required*"}
+                />
               </div>
               <div className="col-sm-3">
                 <span className="input-group input-group-sm">
@@ -1246,10 +1311,10 @@ export default function Booking({
                     disabled
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.shipper_postal}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.shipper_postal}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1270,10 +1335,10 @@ export default function Booking({
                     aria-describedby="basic-addon1"
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.shipper_address}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.shipper_address}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1295,16 +1360,16 @@ export default function Booking({
                     maxLength={11}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.shipper_contact}
-                message={"This field is required*"}
-              />
-              <InputError
-                isValid={isError.shipper_contact_error}
-                message={
-                  "Contact Number must start with 0 and contain 10 or 11 digits*"
-                }
-              /> */}
+                <InputError
+                  isValid={isError.shipper_contact}
+                  message={"This field is required*"}
+                />
+                <InputError
+                  isValid={isError.shipper_contact_error}
+                  message={
+                    "Contact Number must start with 0 and contain 10 or 11 digits*"
+                  }
+                />
               </div>
             </div>
             {/* Origin/Area Code of shipper is of Outlet. */}
@@ -1391,10 +1456,10 @@ export default function Booking({
             <div className="row justify-content-center">
               <div className="col-sm-4"></div>
               <div className="col-sm-8">
-                {/* <InputError
-                isValid={isError.reference}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.reference}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             {/* <div className="row mt-2 mb-3 justify-content-center">
@@ -1477,10 +1542,10 @@ export default function Booking({
                     onChange={handleDetailChange}
                   />
                 </span>
-                {/* <InputError
-            isValid={isError.shipper_name}
-            message={"This field is required*"}
-          /> */}
+                <InputError
+                  isValid={isError.shipper_name}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1501,10 +1566,10 @@ export default function Booking({
                     aria-describedby="basic-addon1"
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_name}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.consignee_name}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1532,10 +1597,10 @@ export default function Booking({
                     selected={selectedConsigneeProvince}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_province}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.consignee_province}
+                  message={"This field is required*"}
+                />
               </div>
               <div className="col-3">
                 <span>
@@ -1557,10 +1622,10 @@ export default function Booking({
                     selected={selectedConsigneeCity}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_city}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.consignee_city}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1595,10 +1660,10 @@ export default function Booking({
                     selected={selectedConsigneeBrgy}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_brgy}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.consignee_brgy}
+                  message={"This field is required*"}
+                />
               </div>
               <div className="col-sm-3">
                 <span className="input-group input-group-sm">
@@ -1619,10 +1684,10 @@ export default function Booking({
                     placeholder="Postal"
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_postal}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.consignee_postal}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1644,10 +1709,10 @@ export default function Booking({
                     aria-describedby="basic-addon1"
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_address}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.consignee_address}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <div className="row mt-2 justify-content-center">
@@ -1669,16 +1734,16 @@ export default function Booking({
                     maxLength={11}
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_contact}
-                message={"This field is required*"}
-              />
-              <InputError
-                isValid={isError.consignee_contact_error}
-                message={
-                  "Contact Number must start with 0 and contain 10 or 11 digits*"
-                }
-              /> */}
+                <InputError
+                  isValid={isError.consignee_contact}
+                  message={"This field is required*"}
+                />
+                <InputError
+                  isValid={isError.consignee_contact_error}
+                  message={
+                    "Contact Number must start with 0 and contain 10 or 11 digits*"
+                  }
+                />
               </div>
             </div>
             <div className="row mt-4 justify-content-center">
@@ -1705,10 +1770,10 @@ export default function Booking({
                     disabled
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_origin}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.consignee_origin}
+                  message={"This field is required*"}
+                />
               </div>
               <div className="col-3">
                 <span className="input-group input-group-sm">
@@ -1730,10 +1795,10 @@ export default function Booking({
                     disabled
                   />
                 </span>
-                {/* <InputError
-                isValid={isError.consignee_area_code}
-                message={"This field is required*"}
-              /> */}
+                <InputError
+                  isValid={isError.consignee_area_code}
+                  message={"This field is required*"}
+                />
               </div>
             </div>
             <hr />
@@ -2935,7 +3000,7 @@ export default function Booking({
                     <button
                       type="submit"
                       className="btn-next btn-rad"
-                      // onClick={handleNext}
+                      onClick={handleNext}
                     >
                       {" "}
                       Next{" "}
@@ -3006,8 +3071,7 @@ export default function Booking({
                     className="col-sm-4 align-center"
                     style={{ textAlignLast: "end" }}
                   >
-                    Hello
-                    {/* <img src={caution} width={100} height={100} /> */}
+                    <img src={caution} width={100} height={100} />
                   </div>
                   <div
                     className="col-sm-8 align-left pt-3 fw-bold"
@@ -3025,7 +3089,7 @@ export default function Booking({
                         border: "none",
                       }}
                       onClick={() => {
-                        //   setOpenOtd(false)
+                        setOpenOtd(false)
                       }}
                     >
                       Close
@@ -3038,8 +3102,8 @@ export default function Booking({
                         border: "none",
                       }}
                       onClick={() => {
-                        //   setOpenOtd(false)
-                        navigation.next()
+                        setOpenOtd(false)
+                        // navigation.next()
                       }}
                     >
                       Proceed
