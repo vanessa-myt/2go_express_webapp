@@ -7,11 +7,11 @@ import "./BookingSuccess.css"
 import { refreshPage } from "../../Helpers/Utils/Common"
 
 function BookingSuccess({ navigation, transactionDetails, generalDetails }) {
-  const navigate = useNavigate()
+  const navigateto = useNavigate()
   const [redirect, setRedirect] = useState("")
   if (redirect === "new") {
     setTimeout(() => {
-      navigate("/")
+      navigateto("/")
       refreshPage()
     }, 1000)
   }
@@ -23,12 +23,10 @@ function BookingSuccess({ navigation, transactionDetails, generalDetails }) {
     <div>
       <Navbar></Navbar>
       <div className="container">
-        <h1 className="header justify-content-start title left mt-5">
-          PLACE BOOKING
-        </h1>
+        
         <div className="container form-cont">
-          <h3 className="header justify-content-start title mt-3">
-            BOOKING SUCCESSFUL
+          <h3 className="header justify-content-center title mt-3" style={{textAlign:"-webkit-center"}}>
+            BOOKING SUCCESSFUL!
           </h3>
           <div className="row justify-content-center">
             <div className="col-12 text-center">
@@ -50,7 +48,8 @@ function BookingSuccess({ navigation, transactionDetails, generalDetails }) {
             <div className="col-sm-2">
               <button
                 className="btn-pink btn-rad"
-                onClick={() => navigation.go("international")}
+                onClick={() => navigateto("/")}
+                style={{width:"100%"}}
               >
                 {" "}
                 New Transaction{" "}
