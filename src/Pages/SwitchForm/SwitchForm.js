@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useStep } from "react-hooks-helper"
-import InternationalForm from "../International/InternationalForm"
-import Confirmation from "../Confirmation/Confirmation"
+import "../International/InternationalForm.css"
 import {
   formatDate,
   formatDateNoTime,
@@ -19,9 +18,10 @@ import Dashboard from "../Dashboard/Dashboard"
 import TimelineComponent from "../Timeline/TimelineComponent"
 import Booking from "../Booking/Booking"
 import { searchAreasDef } from "../../Helpers/ApiCalls/expressAPI"
+import Summary from "../Summary/Summary"
 
 function SwitchForm() {
-  const steps = [{ id: "dashboard" }, { id: "booking" }, { id: "track" }]
+  const steps = [{ id: "booking" },{ id: "summary" } ,{id:"confirm-booking"}]
   const { step, navigation } = useStep({
     steps,
     initialStep: 0,
@@ -740,7 +740,9 @@ function SwitchForm() {
   //payment
   const [type, setType] = useState("")
   const [generalDetails, setGeneralDetails] = useState({})
-  const [transactionDetails, setTransactionDetails] = useState({})
+  const [transactionDetails, setTransactionDetails] = useState({
+    transaction_id:"sample12345"
+  })
 
   const [shipperProvince, setShipperProvince] = useState([])
   const [selectedShipperProvince, setSelectedShipperProvince] = useState([])
@@ -1012,12 +1014,12 @@ function SwitchForm() {
   }, [])
 
   switch (step.id) {
-    case "dashboard":
-      return <Dashboard {...packageProps} />
     case "booking":
       return <Booking {...packageProps} />
-    case "track":
-      return <TimelineComponent {...packageDetailsProps} />
+    case "summary":
+      return <Summary {...summaryProps} />
+    case "confirm-booking":
+      return <BookingSuccess {...paymentProps} />
   }
 
   return <div></div>

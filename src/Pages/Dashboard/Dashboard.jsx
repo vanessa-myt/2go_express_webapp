@@ -2,76 +2,9 @@ import Navbar from "../../Components/Navbar/Navbar"
 import "./Dashboard.css"
 import booking from "../../Assets/Images/Form/booking.png"
 import packageimg from "../../Assets/Images/Form/package.png"
-export default function Dashboard({
-  navigation,
-  docuClicked,
-  setDocuClicked,
-  parcelClicked,
-  setParcelClicked,
-  generalDetails,
-  setGeneralDetails,
-  generalDetailsExpress,
-  setGeneralDetailsExpress,
-  serviceTypes,
-  setServiceTypes,
-  areas,
-  shipperProvince,
-  setShipperProvince,
-  selectedShipperProvince,
-  setSelectedShipperProvince,
-  shipperCities,
-  setShipperCities,
-  selectedShipperCity,
-  setSelectedShipperCity,
-  shipperBrgy,
-  setShipperBrgy,
-  selectedShipperBrgy,
-  setSelectedShipperBrgy,
-  consigneeProvince,
-  setConsigneeProvince,
-  selectedConsigneeProvince,
-  setSelectedConsigneeProvince,
-  consigneeCities,
-  setConsigneeCities,
-  selectedConsigneeCity,
-  setSelectedConsigneeCity,
-  consigneeBrgy,
-  setConsigneeBrgy,
-  selectedConsigneeBrgy,
-  setSelectedConsigneeBrgy,
-  documentDetails,
-  setDocumentDetails,
-  expressType,
-  fileNames,
-  setFileNames,
-  hasResultShipper,
-  setHasResultShipper,
-  searchInputShipper,
-  setSearchInputShipper,
-  resultsShipper,
-  setResultsShipper,
-  hasResultConsignee,
-  setHasResultConsignee,
-  searchInputConsignee,
-  setSearchInputConsignee,
-  resultsConsignee,
-  setResultsConsignee,
-  searchingShipper,
-  setSearchingShipper,
-  searchingConsignee,
-  setSearchingConsignee,
-  setPackageCodes,
-  advisoryCustomer,
-  pickupOutlets,
-  selectedOutlet,
-  setSelectedOutlet,
-  pickup,
-  setPickup,
-  dropoff,
-  setDropoff,
-  setHasDropoff,
-  setAWb,
-}) {
+import { useNavigate } from "react-router-dom"
+export default function Dashboard() {
+  const navigateto = useNavigate()
   return (
     <div>
       <Navbar />
@@ -80,7 +13,7 @@ export default function Dashboard({
           <div className="col-4 ">
             <div
               className="card-col text-center"
-              onClick={() => navigation.go("track")}
+              onClick={() => navigateto("/track-and-trace")}
             >
               <img src={booking} alt="booking" height={200} />
               <div className="purple-label mt-3 text-center">TRACK & TRACE</div>
@@ -89,7 +22,7 @@ export default function Dashboard({
           <div className="col-4">
             <div
               className="card-col text-center"
-              onClick={() => navigation.next()}
+              onClick={() => navigateto("/booking")}
             >
               <img src={packageimg} alt="booking" height={200} />
               <div className="purple-label mt-3 text-center">
