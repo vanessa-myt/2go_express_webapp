@@ -268,3 +268,7 @@ select:disabled {
   }
 
 }
+
+.badge {
+  color: var(--cancel-btn) !important;
+}
