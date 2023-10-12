@@ -20,6 +20,21 @@ export const formatPrice = (p) => {
   return result
 }
 
+
+export const formatDateWithTime = (date) => {
+  var formatDate = new Date(date);
+  var stringDate = formatDate.toDateString().split(" ");
+  return (
+    stringDate[1] +
+    " " +
+    stringDate[2] +
+    ", " +
+    stringDate[3] +
+    " " +
+    formatDate.toLocaleTimeString().replace(/(.*)\D\d+/, "$1")
+  );
+};
+
 export const formatDate = (date) => {
   //if date is null or empty string return nothin
   if (!date || date == "") {
