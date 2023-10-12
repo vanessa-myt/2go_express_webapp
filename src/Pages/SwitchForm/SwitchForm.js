@@ -21,7 +21,11 @@ import { searchAreasDef } from "../../Helpers/ApiCalls/expressAPI"
 import Summary from "../Summary/Summary"
 
 function SwitchForm() {
-  const steps = [{ id: "booking" },{ id: "summary" } ,{id:"confirm-booking"}]
+  const steps = [
+    { id: "booking" },
+    { id: "summary" },
+    { id: "confirm-booking" },
+  ]
   const { step, navigation } = useStep({
     steps,
     initialStep: 0,
@@ -741,7 +745,7 @@ function SwitchForm() {
   const [type, setType] = useState("")
   const [generalDetails, setGeneralDetails] = useState({})
   const [transactionDetails, setTransactionDetails] = useState({
-    transaction_id:"sample12345"
+    transaction_id: "sample12345",
   })
 
   const [shipperProvince, setShipperProvince] = useState([])
@@ -863,7 +867,9 @@ function SwitchForm() {
     setDropoff,
     setHasDropoff,
     setAWb,
-    packageCodes
+    packageCodes,
+    setBreakDown,
+    setTransactionID,
   }
   const packageDetailsProps = {
     navigation,
@@ -982,6 +988,7 @@ function SwitchForm() {
     setPaymentDetails,
     selectedCommodity,
     setSelectedCommodity,
+    transactionID
   }
 
   //get 2go areas list
