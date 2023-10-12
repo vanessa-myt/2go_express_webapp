@@ -190,7 +190,7 @@ function Summary({
         .reduce((a, b) => a + b, 0)
 
       if (expressType === "NEW") {
-        navigation.go("payment")
+        navigation.next()
       } else {
         if (parseInt(total_qty) > 1) {
           navigation.next()
@@ -275,12 +275,12 @@ function Summary({
             <div className="container mb-5">
               <div className="form-container">
                 <div className="row justify-content-start">
-                  <div className="col-sm color-pink text-left mb-2">
+                  <div className="col-sm-10 color-pink text-left mb-2">
                     <h2>SUMMARY</h2>
                   </div>
                 </div>
 
-                <div className="row mt-2">
+                <div className="row mt-2 ">
                   <div className="col-sm-6">
                     <div className="col-sm-12">
                       <p className="input-title">Shipment Details</p>
@@ -347,11 +347,11 @@ function Summary({
                     </div>
                     <div className="row mt-2">
                       <div className="col-sm-5">
-                        <p className="input-subtitle">Account Number</p>
+                        {/* <p className="input-subtitle">Account Number</p> */}
                       </div>
                       <div className="col-sm-6">
                         <span className="text span-summary">
-                          {generalDetailsExpress.account_number}
+                          {/* {generalDetailsExpress.account_number} */}
                         </span>
                       </div>
                     </div>
@@ -367,11 +367,11 @@ function Summary({
                     </div>
                     <div className="row mt-2">
                       <div className="col-sm-5">
-                        <p className="input-subtitle">Account Name</p>
+                        {/* <p className="input-subtitle">Account Name</p> */}
                       </div>
                       <div className="col-sm-6">
                         <span className="text span-summary">
-                          {generalDetailsExpress.account_name}
+                          {/* {generalDetailsExpress.account_name} */}
                         </span>
                       </div>
                     </div>
@@ -382,7 +382,7 @@ function Summary({
             
             </div> */}
                   {/* <hr /> */}
-                  <div className="row">
+                  <div className="row mt-3">
                     <div className="col-sm-6">
                       {/* SHIPPER DETAILS */}
                       <div className="col-sm-12">
@@ -510,7 +510,7 @@ function Summary({
                     </div>
                   </div>
 
-                  <div className="col-sm-12">
+                  <div className="col-sm-12 mt-3">
                     <p className="input-title">Packages</p>
                   </div>
 
@@ -723,7 +723,7 @@ function Summary({
                     })}
                   </Accordion>
 
-                  <div className="col-sm-2">
+                  <div className="col-sm-2 mt-3">
                     <p className="input-title">Payment Details</p>
                   </div>
                   <div className="row mt-2">
@@ -812,11 +812,12 @@ function Summary({
                           name="agreement"
                           checked={agree}
                           onChange={handleSelectChange}
-                        />
+                        />{" "}
                         <label
                           className="custom-control-label agreement"
                           htmlFor="agreement"
                         >
+                          {" "}
                           I agree to the Privacy Policy and Terms of Agreement.
                         </label>
                         <InputError
@@ -826,38 +827,43 @@ function Summary({
                       </div>
                     </span>
                   </div>
-                  <div className="row mt-4 justify-content-end">
-                    <div className="col-sm-4"></div>
-
-                    <div className="col-sm-2">
-                      <button className="btn-back btn-rad" onClick={handleBack}>
-                        {" "}
-                        Back{" "}
-                      </button>
-                    </div>
-                    <div className="col-sm-2">
-                      {isClicked ? (
-                        <button
-                          type="submit"
-                          className="btn-next btn-rad  proceed loader"
-                        >
-                          <ReactLoading
-                            type="balls"
-                            color="white"
-                            height={28}
-                            width={25}
-                          />
-                        </button>
-                      ) : (
-                        <button
-                          className="btn-next btn-rad"
-                          type="submit"
-                          onClick={handleNext}
-                        >
-                          {" "}
-                          Next{" "}
-                        </button>
-                      )}
+                  <div className="row mt-4 justify-content-center">
+                    <div className="col-11">
+                      <div className="row justify-content-between">
+                        <div className="col-sm-2">
+                          <button
+                            className="btn-back btn-rad"
+                            onClick={handleBack}
+                          >
+                            {" "}
+                            Back{" "}
+                          </button>
+                        </div>
+                        <div className="col-sm-2">
+                          {isClicked ? (
+                            <button
+                              type="submit"
+                              className="btn-next btn-rad  proceed loader"
+                            >
+                              <ReactLoading
+                                type="balls"
+                                color="white"
+                                height={28}
+                                width={25}
+                              />
+                            </button>
+                          ) : (
+                            <button
+                              className="btn-next btn-rad"
+                              type="submit"
+                              onClick={handleNext}
+                            >
+                              {" "}
+                              Next{" "}
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
