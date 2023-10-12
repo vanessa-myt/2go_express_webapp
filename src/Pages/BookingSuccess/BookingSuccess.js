@@ -6,7 +6,7 @@ import { Navigate } from "react-router-dom"
 import "./BookingSuccess.css"
 import { refreshPage } from "../../Helpers/Utils/Common"
 
-function BookingSuccess({ navigation, transactionDetails, generalDetails }) {
+function BookingSuccess({ navigation, transactionDetails, generalDetails, transactionID }) {
   const navigateto = useNavigate()
   const [redirect, setRedirect] = useState("")
   if (redirect === "new") {
@@ -33,7 +33,7 @@ function BookingSuccess({ navigation, transactionDetails, generalDetails }) {
               <h3 className="header title mt-3 grey">
                 TRANSACTION ID:{" "}
                 <span style={{ color: "var(--primary-color)" }}>
-                  {transactionDetails.transaction_id}
+                  {transactionID}
                 </span>
               </h3>
             </div>
