@@ -115,7 +115,7 @@ export const createExpress = async (
     })
 
     const response = await postAPICall(
-      process.env.REACT_APP_LINK + "express_transactions/add",
+      process.env.REACT_APP_LINK + "public_express_transactions/add",
       {
         ...data,
         destination_system:
