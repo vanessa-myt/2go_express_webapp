@@ -93,6 +93,8 @@ export default function Booking({
   setAWb,
   //package
   packageCodes,
+  setBreakDown,
+  setTransactionID,
 }) {
   /* Variables */
   const [openOsa, setOpenOsa] = useState(false)
@@ -789,6 +791,7 @@ export default function Booking({
 
   //validations
   const handleNext = () => {
+    setIsClicked(true)
     if (
       validatePrimaryDetails(
         generalDetailsExpress,
@@ -803,6 +806,8 @@ export default function Booking({
         handleNextPackage()
         // navigation.next()
       }
+    } else {
+      setIsClicked(false)
     }
   }
 
@@ -878,6 +883,8 @@ export default function Booking({
         }
       })
       checker = true
+    } else {
+      setIsClicked(false)
     }
     if (checker) {
       if (valid_package) {
@@ -906,6 +913,7 @@ export default function Booking({
         // navigation.go("summary")
         // }
       } else {
+        setIsClicked(false)
         error_package.map((data) => {
           toast.error(data, {
             autoClose: 4000,
@@ -979,11 +987,11 @@ export default function Booking({
         autoClose: 2000,
         hideProgressBar: true,
       })
-      // setTransactionID(response.data.transaction_id)
-      // setBreakDown(response.data.breakdown)
+      setTransactionID(response.data.transaction_id)
+      setBreakDown(response.data.breakdown)
       setTimeout(() => {
         setIsClicked(false)
-        alert("successfully added")
+        navigation.next()
       }, 1000)
     }
 
@@ -3284,15 +3292,32 @@ export default function Booking({
                   </div>
 
                   <div className="col-sm-2">
-                    <button
-                      type="submit"
-                      className="btn-next btn-rad"
-                      // onClick={handleNext}
-                      onClick={() => navigation.next()}
-                    >
-                      {" "}
-                      Next{" "}
-                    </button>
+                    {isClicked ? (
+                      <button
+                        type="submit"
+                        className="btn-next btn-rad"
+                        style={{ textAlign: "-webkit-center" }}
+                        // onClick={handleNext}
+                        // onClick={() => navigation.next()}
+                      >
+                        <ReactLoading
+                          type="balls"
+                          color="white"
+                          height={28}
+                          width={25}
+                        />
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        className="btn-next btn-rad"
+                        onClick={handleNext}
+                        // onClick={() => navigation.next()}
+                      >
+                        {" "}
+                        Next{" "}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -3378,6 +3403,7 @@ export default function Booking({
                       }}
                       onClick={() => {
                         setOpenOtd(false)
+                        setIsClicked(false)
                       }}
                     >
                       Close
