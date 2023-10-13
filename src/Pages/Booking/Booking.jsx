@@ -983,16 +983,27 @@ export default function Booking({
     }
 
     if (response.data) {
-      toast.success(response.data.response.toUpperCase(), {
-        autoClose: 2000,
-        hideProgressBar: true,
-      })
-      setTransactionID(response.data.transaction_id)
-      setBreakDown(response.data.breakdown)
-      setTimeout(() => {
+      if (
+        response.data.breakdown
+          .map((data) => parseFloat(data.amount))
+          .reduce((a, b) => a + b, 0) > 0
+      ) {
+        toast.success(response.data.response.toUpperCase(), {
+          autoClose: 2000,
+          hideProgressBar: true,
+        })
+        setTransactionID(response.data.transaction_id)
+        setBreakDown(response.data.breakdown)
+        setTimeout(() => {
+          setIsClicked(false)
+          navigation.next()
+        }, 1000)
+      } else {
+        toast.error(
+          "Express did not return payment breakdown. Please try again."
+        )
         setIsClicked(false)
-        navigation.next()
-      }, 1000)
+      }
     }
 
     // navigation.next()
