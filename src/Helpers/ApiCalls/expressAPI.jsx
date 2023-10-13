@@ -138,3 +138,18 @@ export const createExpress = async (
     return { error: error.response }
   }
 }
+
+export const trackExpress = async (ref_no) => {
+  try {
+    const response = await postAPICall(
+      process.env.REACT_APP_LINK + "public_express_transactions/lookup",
+      {
+        ref_no: ref_no,
+      }
+    )
+
+    return { data: response.data.data }
+  } catch (error) {
+    return { error: error.response }
+  }
+}
