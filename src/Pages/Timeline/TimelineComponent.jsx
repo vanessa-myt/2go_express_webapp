@@ -1,11 +1,18 @@
 import { Timeline } from "antd"
 import Navbar from "../../Components/Navbar/Navbar"
 import { Input, Space } from "antd"
+import { trackExpress } from "../../Helpers/ApiCalls/expressAPI"
+import { useState } from "react"
 
 const { Search } = Input
 
 const onSearch = (value, _e, info) => console.log(info?.source, value)
 export default function TimelineComponent() {
+  const [ref_no, setRefNo] = useState("")
+  async function track() {
+    const response = await trackExpress(ref_no)
+    console.log(response)
+  }
   return (
     <div>
       <Navbar />
@@ -17,7 +24,8 @@ export default function TimelineComponent() {
           <div className="col-5">
             <Search
               placeholder="Enter Tracking No."
-              onSearch={onSearch}
+              onChange={(e) => setRefNo(e.target.value)}
+              onSearch={track}
               enterButton
             />
           </div>
