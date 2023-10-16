@@ -31,7 +31,7 @@ function BookingSuccess({ navigation, transactionDetails, generalDetails, transa
           <div className="row justify-content-center">
             <div className="col-12 text-center">
               <h3 className="header title mt-3 grey">
-                TRANSACTION ID:{" "}
+                BOOKING NO.:{" "}
                 <span style={{ color: "var(--primary-color)" }}>
                   {transactionID}
                 </span>
