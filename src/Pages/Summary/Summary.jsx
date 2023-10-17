@@ -10,6 +10,7 @@ import { Accordion } from "react-bootstrap"
 
 import InputError from "../../Components/InputError/InputError"
 import Navbar from "../../Components/Navbar/Navbar"
+import { confirmBooking } from "../../Helpers/ApiCalls/expressAPI"
 
 function Summary({
   navigation,
@@ -125,78 +126,53 @@ function Summary({
     }
   }
 
-  const handleNext = () => {
+  async function handleNext() {
     if (agree) {
-      var paymode = ""
+      setIsClicked(true)
 
-      if (generalDetailsExpress.account_number === "WALK-IN") {
-        if (generalDetailsExpress.payor === "shipper") {
-          paymode = "new-shipper"
-        }
-        if (generalDetailsExpress.payor === "consignee") {
-          paymode = "new-consignee"
-        }
-      } else {
-        if (generalDetailsExpress.payment_term === "credit") {
-          if (generalDetailsExpress.payor === "shipper") {
-            paymode = "collect-shipper"
-          }
-          if (generalDetailsExpress.payor === "consignee") {
-            paymode = "collect-consignee"
-          }
+      const response = await confirmBooking(transactionID)
+      console.log("response", response)
+      if (response.error) {
+        setIsClicked(false)
+        console.log(response.error)
+        if (
+          response.error.data?.messages?.error ===
+          "API key or token not authorized."
+        ) {
+          //removeUserSession();
         } else {
-          paymode = "new-shipper"
+          if (Array.isArray(response.error.data.messages.errors)) {
+            toast.error(
+              response.error.data?.messages?.errors[0].code?.toUpperCase() +
+                ": " +
+                response.error.data?.messages?.errors[0].message.toUpperCase(),
+              { autoClose: 4000, hideProgressBar: true }
+            )
+          } else {
+            toast.error(response.error.data?.messages?.error.toUpperCase(), {
+              autoClose: 4000,
+              hideProgressBar: true,
+            })
+          }
+          console.log(response.error)
+
+          // setIsClicked(false)
         }
       }
+      if (response.data) {
+        setTransactionDetails({
+          ...transactionDetails,
+          booking_id: response.data.booking_number,
+        })
 
-      var final_package_codes = []
-      documentDetails.map((data) => {
-        final_package_codes.push(
-          packageCodes[parseInt(data.package_code)]["id"]
-        )
-      })
-
-      setType("express")
-
-      setGeneralDetails({
-        service_id: 2,
-        detail_type: "express",
-        name: "2GO Express",
-        destination_system: generalDetailsExpress.destination_system,
-        transaction_type: generalDetailsExpress.transaction_type,
-        packaging:
-          generalDetailsExpress.transaction_type === "document"
-            ? "2go_packaging"
-            : generalDetailsExpress.packaging,
-        package_codes: final_package_codes,
-      })
-      setTransactionDetails({
-        base_rate: breakdown.filter(
-          (data) => data.name.toUpperCase() === "WEIGHT CHARGE"
-        )[0].amount,
-        vat: breakdown.filter((data) => data.name.toUpperCase() === "VAT")[0]
-          .amount,
-
-        breakdown: breakdown.filter(
-          (data) =>
-            data.name.toUpperCase() !== "VAT" &&
-            data.name.toUpperCase() !== "WEIGHT CHARGE"
-        ),
-        paymode: paymode,
-        transaction_no: transactionID,
-      })
-      var total_qty = documentDetails
-        .map((data) => parseFloat(data.quantity))
-        .reduce((a, b) => a + b, 0)
-
-      if (expressType === "NEW") {
-        navigation.next()
-      } else {
-        if (parseInt(total_qty) > 1) {
+        toast.success("BOOKING CONFIRMED", {
+          autoClose: 2000,
+          hideProgressBar: true,
+        })
+        setTimeout(() => {
           navigation.next()
-        } else {
-          // addDropoffSingle()/
-        }
+          // setLoadingPackage(false)
+        }, 4000)
       }
     }
   }
@@ -844,6 +820,7 @@ function Summary({
                             <button
                               type="submit"
                               className="btn-next btn-rad  proceed loader"
+                              style={{ textAlign: "-webkit-center" }}
                             >
                               <ReactLoading
                                 type="balls"

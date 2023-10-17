@@ -153,3 +153,18 @@ export const trackExpress = async (ref_no) => {
     return { error: error.response }
   }
 }
+export const confirmBooking = async (transaction_id) => {
+  try {
+    const response = await postAPICall(
+      process.env.REACT_APP_LINK +
+        "public_express_transactions/confirm_booking",
+      {
+        transaction_id: transaction_id,
+      }
+    )
+
+    return { data: response.data }
+  } catch (error) {
+    return { error: error.response }
+  }
+}
