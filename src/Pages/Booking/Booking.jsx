@@ -21,6 +21,7 @@ import {
   validatePrimaryDetails,
 } from "../../Helpers/Validation/expressValidation"
 import InputError from "../../Components/InputError/InputError"
+import { useNavigate } from "react-router-dom"
 
 export default function Booking({
   navigation,
@@ -97,6 +98,7 @@ export default function Booking({
   setTransactionID,
 }) {
   /* Variables */
+  const navigate = useNavigate()
   const [openOsa, setOpenOsa] = useState(false)
   const [openOtd, setOpenOtd] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
@@ -3330,7 +3332,7 @@ export default function Booking({
                     <button
                       className="btn-back btn-rad"
                       onClick={() => {
-                        navigation.go("/dashboard")
+                        navigate("/")
                       }}
                     >
                       Back{" "}
