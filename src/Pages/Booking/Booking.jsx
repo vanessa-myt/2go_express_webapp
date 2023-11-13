@@ -3281,7 +3281,7 @@ export default function Booking({
               </div>
             </div>
             <div className="row mb-5 justify-content-center">
-              <div className="col-6 mt-2 p-3">
+              <div className="col-5 mt-2 p-3">
                 <div className="form-group">
                   <input
                     type="checkbox"
@@ -3308,7 +3308,7 @@ export default function Booking({
                 </div>
               </div>
               <div
-                className="col-6 text-right align-right mt-3"
+                className="col-5 text-right align-right mt-3"
                 style={{ fontSize: "x-large", textAlign: "-webkit-right" }}
               >
                 TOTAL WEIGHT:{" "}
