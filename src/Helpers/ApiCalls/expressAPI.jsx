@@ -148,7 +148,7 @@ export const trackExpress = async (ref_no) => {
       }
     )
 
-    return { data: response.data.data }
+    return { data: response.data }
   } catch (error) {
     return { error: error.response }
   }
