@@ -100,6 +100,7 @@ export default function Booking({
   const [openOsa, setOpenOsa] = useState(false)
   const [openOtd, setOpenOtd] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
+  const [agree, setAgree] = useState(true)
 
   /*Validation Variables */
   const [isError, setIsError] = useState({
@@ -293,6 +294,14 @@ export default function Booking({
       })
     } else {
       setGeneralDetailsExpress({ ...generalDetailsExpress, [name]: value })
+    }
+  }
+
+  const handleAgreeChange = (e) => {
+    if (e.target.checked) {
+      setAgree(true)
+    } else {
+      setAgree(false)
     }
   }
 
@@ -3272,8 +3281,34 @@ export default function Booking({
               </div>
             </div>
             <div className="row mb-5 justify-content-center">
+              <div className="col-6 mt-2 p-3">
+                <div className="form-group">
+                  <input
+                    type="checkbox"
+                    className="custom-control-inpu mr-10 "
+                    id="privacy"
+                    name="privacy"
+                    checked={agree}
+                    onChange={handleAgreeChange}
+                  />
+
+                  <label
+                    className="custom-control-label input-subtitle pad-left5"
+                    htmlFor="privacy"
+                  >
+                    I agree to 2GO's{" "}
+                    <a
+                      href="https://www.2go.com.ph/privacy-policy/"
+                      target="_blank"
+                    >
+                      Privacy Policy and Terms and Conditions
+                    </a>
+                    .
+                  </label>
+                </div>
+              </div>
               <div
-                className="col-10 text-right align-right mt-3"
+                className="col-6 text-right align-right mt-3"
                 style={{ fontSize: "x-large", textAlign: "-webkit-right" }}
               >
                 TOTAL WEIGHT:{" "}
