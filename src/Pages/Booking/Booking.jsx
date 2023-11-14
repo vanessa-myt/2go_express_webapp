@@ -802,23 +802,27 @@ export default function Booking({
 
   //validations
   const handleNext = () => {
-    setIsClicked(true)
-    if (
-      validatePrimaryDetails(
-        generalDetailsExpress,
-        pickup,
-        selectedOutlet,
-        setIsError
-      )
-    ) {
-      if (generalDetailsExpress.consignee_delivery_category === "OTD") {
-        setOpenOtd(true)
+    if (agree) {
+      setIsClicked(true)
+      if (
+        validatePrimaryDetails(
+          generalDetailsExpress,
+          pickup,
+          selectedOutlet,
+          setIsError
+        )
+      ) {
+        if (generalDetailsExpress.consignee_delivery_category === "OTD") {
+          setOpenOtd(true)
+        } else {
+          handleNextPackage()
+          // navigation.next()
+        }
       } else {
-        handleNextPackage()
-        // navigation.next()
+        setIsClicked(false)
       }
     } else {
-      setIsClicked(false)
+      toast.error("Please read and tick the agreement box.")
     }
   }
 
